@@ -2,28 +2,31 @@ defmodule KonewWeb.Router do
   use KonewWeb, :router
 
   pipeline :browser do
-    plug :accepts, ["html"]
-    plug :fetch_session
-    plug :fetch_live_flash
-    plug :put_root_layout, html: {KonewWeb.Layouts, :root}
-    plug :protect_from_forgery
-    plug :put_secure_browser_headers
+    plug(:accepts, ["html"])
+    plug(:fetch_session)
+    plug(:fetch_live_flash)
+    plug(:put_root_layout, html: {KonewWeb.Layouts, :root})
+    plug(:protect_from_forgery)
+    plug(:put_secure_browser_headers)
   end
 
   pipeline :api do
-    plug :accepts, ["json"]
+    plug(:accepts, ["json"])
   end
 
   scope "/", KonewWeb do
-    pipe_through :browser
+    pipe_through(:browser)
 
-    get "/", PageController, :home
+    get("/", PageController, :home)
+
+    get("/drawings", DrawingController, :index)
+    get("/drawings/raw/:id", DrawingController, :show_image, as: :drawing_raw)
   end
 
   scope "/api", KonewWeb do
-    pipe_through :api
+    pipe_through(:api)
 
-    post "/drawings", DrawingController, :create
+    post("/drawings", DrawingController, :create)
   end
 
   # Enable LiveDashboard and Swoosh mailbox preview in development
@@ -36,10 +39,10 @@ defmodule KonewWeb.Router do
     import Phoenix.LiveDashboard.Router
 
     scope "/dev" do
-      pipe_through :browser
+      pipe_through(:browser)
 
-      live_dashboard "/dashboard", metrics: KonewWeb.Telemetry
-      forward "/mailbox", Plug.Swoosh.MailboxPreview
+      live_dashboard("/dashboard", metrics: KonewWeb.Telemetry)
+      forward("/mailbox", Plug.Swoosh.MailboxPreview)
     end
   end
 end

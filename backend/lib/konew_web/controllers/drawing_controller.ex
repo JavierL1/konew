@@ -23,4 +23,17 @@ defmodule KonewWeb.DrawingController do
         |> json(%{errors: Ecto.Changeset.traverse_errors(changeset, &translate_error/1)})
     end
   end
+
+  def show_image(conn, %{"id" => id}) do
+    drawing = Konew.Library.get_drawing!(id)
+
+    conn
+    |> put_resp_content_type(drawing.content_type)
+    |> send_resp(200, drawing.image_data)
+  end
+
+  def index(conn, _params) do
+    drawings = Konew.Library.list_drawings()
+    render(conn, :index, drawings: drawings)
+  end
 end

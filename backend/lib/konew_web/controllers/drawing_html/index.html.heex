@@ -1,0 +1,19 @@
+<div class="p-8">
+  <h1 class="text-3xl font-bold mb-8 border-b pb-4">Drawing Gallery</h1>
+  
+  <div class="columns-1 sm:columns-2 md:columns-3 gap-4 space-y-4">
+    <%= for drawing <- @drawings do %>
+      <div class="break-inside-avoid border-2 border-zinc-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+        <img 
+          src={~p"/drawings/raw/#{drawing.id}"} 
+          alt="Full Drawing" 
+          class="w-full h-auto block"
+        />
+        <div class="p-3 bg-zinc-50 flex justify-between items-center text-xs font-mono text-zinc-500">
+          <span>ID: <%= drawing.id %></span>
+          <span class="px-2 py-1 bg-zinc-200 rounded-md uppercase"><%= drawing.content_type %></span>
+        </div>
+      </div>
+    <% end %>
+  </div>
+</div>
