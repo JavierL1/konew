@@ -1,0 +1,12 @@
+{
+  "name": "Elixir & Postgres",
+  "dockerComposeFile": "docker-compose.yaml",
+  "service": "app", // Tells VS Code which service to enter
+  "workspaceFolder": "/workspace",
+  "customizations": {
+    "vscode": {
+      "extensions": ["JakeBecker.elixir-ls", "phoenixframework.phoenix"]
+    }
+  },
+  "remoteUser": "vscode"
+}
