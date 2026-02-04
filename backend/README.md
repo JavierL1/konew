@@ -16,3 +16,18 @@ Ready to run in production? Please [check our deployment guides](https://hexdocs
 * Docs: https://hexdocs.pm/phoenix
 * Forum: https://elixirforum.com/c/phoenix-forum
 * Source: https://github.com/phoenixframework/phoenix
+
+## Endpoint usage
+
+```bash
+curl -X POST http://localhost:4000/api/drawings \
+  -F "drawing=@/home/bigmiau/Pictures/cat.png"
+```
+
+## To Do List
+
+- [x] Post drawings
+- [ ] Drawing view
+- [ ] Create user rooms
+- [ ] Join user rooms
+- [ ] Create challenges

@@ -3,8 +3,10 @@ defmodule Konew.Library.Drawing do
   import Ecto.Changeset
 
   schema "drawings" do
-    field :image_data, :binary
-    field :content_type, :string
+    field(:image_data, :binary)
+    field(:content_type, :string)
+
+    belongs_to(:user, Konew.Accounts.User)
 
     timestamps(type: :utc_datetime)
   end
