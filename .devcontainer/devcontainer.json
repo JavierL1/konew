@@ -5,7 +5,13 @@
   "workspaceFolder": "/workspace",
   "customizations": {
     "vscode": {
-      "extensions": ["JakeBecker.elixir-ls", "phoenixframework.phoenix"]
+      "settings": {
+        "elixirLS.projectDir": "backend"
+      },
+      "extensions": [
+        "JakeBecker.elixir-ls",
+        "phoenixframework.phoenix"
+      ]
     }
   },
   "remoteUser": "vscode"
