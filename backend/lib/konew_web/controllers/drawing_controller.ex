@@ -5,10 +5,12 @@ defmodule KonewWeb.DrawingController do
 
   def create(conn, %{"drawing" => %Plug.Upload{} = upload}) do
     binary_data = File.read!(upload.path)
+    user = conn.assigns[:current_user]
 
     %{
       image_data: binary_data,
-      content_type: upload.content_type
+      content_type: upload.content_type,
+      user_id: user.id
     }
     |> Konew.Library.create_drawing()
     |> case do
