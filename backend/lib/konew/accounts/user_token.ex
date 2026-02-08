@@ -1,6 +1,8 @@
 defmodule Konew.Accounts.UserToken do
   use Ecto.Schema
+
   import Ecto.Query
+
   alias Konew.Accounts.UserToken
 
   @hash_algorithm :sha256
@@ -11,6 +13,19 @@ defmodule Konew.Accounts.UserToken do
   @magic_link_validity_in_minutes 15
   @change_email_validity_in_days 7
   @session_validity_in_days 14
+  @api_token_validity_in_days 365
+
+  @type t() :: %{
+          id: integer(),
+          token: binary(),
+          context: String.t(),
+          sent_to: String.t(),
+          authenticated_at: DateTime.t(),
+          user_id: String.t(),
+          user: Konew.Accounts.User.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
 
   schema "users_tokens" do
     field :token, :binary
@@ -78,21 +93,9 @@ defmodule Konew.Accounts.UserToken do
   Users can easily adapt the existing code to provide other types of delivery methods,
   for example, by phone numbers.
   """
+  @spec build_email_token(Konew.Accounts.User.t(), String.t()) :: {binary(), UserToken.t()}
   def build_email_token(user, context) do
     build_hashed_token(user, context, user.email)
-  end
-
-  defp build_hashed_token(user, context, sent_to) do
-    token = :crypto.strong_rand_bytes(@rand_size)
-    hashed_token = :crypto.hash(@hash_algorithm, token)
-
-    {Base.url_encode64(token, padding: false),
-     %UserToken{
-       token: hashed_token,
-       context: context,
-       sent_to: sent_to,
-       user_id: user.id
-     }}
   end
 
   @doc """
@@ -148,6 +151,48 @@ defmodule Konew.Accounts.UserToken do
       :error ->
         :error
     end
+  end
+
+  @doc """
+  Checks if the API token is valid and returns its underlying lookup query.
+
+  The query returns the user found by the token, if any.
+
+  The given token is valid if it matches its hashed counterpart in the
+  database and the user email has not changed. This function also checks
+  if the token is being used within 365 days.
+  """
+  def verify_api_token_query(token) do
+    case Base.url_decode64(token, padding: false) do
+      {:ok, decoded_token} ->
+        hashed_token = :crypto.hash(@hash_algorithm, decoded_token)
+
+        query =
+          from token in by_token_and_context_query(hashed_token, "api-token"),
+            join: user in assoc(token, :user),
+            where:
+              token.inserted_at > ago(^@api_token_validity_in_days, "day") and
+                token.sent_to == user.email,
+            select: user
+
+        {:ok, query}
+
+      :error ->
+        :error
+    end
+  end
+
+  defp build_hashed_token(user, context, sent_to) do
+    token = :crypto.strong_rand_bytes(@rand_size)
+    hashed_token = :crypto.hash(@hash_algorithm, token)
+
+    {Base.url_encode64(token, padding: false),
+     %UserToken{
+       token: hashed_token,
+       context: context,
+       sent_to: sent_to,
+       user_id: user.id
+     }}
   end
 
   defp by_token_and_context_query(token, context) do

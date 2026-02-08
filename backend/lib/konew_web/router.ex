@@ -15,6 +15,11 @@ defmodule KonewWeb.Router do
 
   pipeline :api do
     plug(:accepts, ["json"])
+    plug(KonewWeb.ApiAuth)
+  end
+
+  pipeline :ensure_api_authenticated do
+    plug KonewWeb.ApiAuth, :ensure_authenticated
   end
 
   scope "/", KonewWeb do
@@ -27,7 +32,13 @@ defmodule KonewWeb.Router do
   end
 
   scope "/api", KonewWeb do
-    pipe_through(:api)
+    pipe_through :api
+
+    post "/log_in", UserSessionController, :create_api_token
+  end
+
+  scope "/api", KonewWeb do
+    pipe_through [:api, :ensure_api_authenticated]
 
     post("/drawings", DrawingController, :create)
   end

@@ -46,6 +46,18 @@ defmodule KonewWeb.UserSessionController do
     end
   end
 
+  def create_api_token(conn, %{"email" => email, "password" => password}) do
+    Accounts.get_user_by_email_and_password(email, password)
+    |> case do
+      %Accounts.User{} = user ->
+        token = Accounts.create_user_api_token(user)
+        json(conn, %{token: token})
+
+      _ ->
+        conn |> put_status(401) |> json(%{error: "Invalid credentials"})
+    end
+  end
+
   def update_password(conn, %{"user" => user_params} = params) do
     user = conn.assigns.current_scope.user
     true = Accounts.sudo_mode?(user)

@@ -2,6 +2,18 @@ defmodule Konew.Accounts.User do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t() :: %{
+          id: integer(),
+          email: String.t(),
+          password: String.t(),
+          hashed_password: String.t(),
+          confirmed_at: DateTime.t(),
+          authenticated_at: DateTime.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
+  @derive {Inspect, except: [:password, :hashed_password]}
   schema "users" do
     field :email, :string
     field :password, :string, virtual: true, redact: true
