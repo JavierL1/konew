@@ -26,9 +26,6 @@ defmodule KonewWeb.Router do
     pipe_through(:browser)
 
     get("/", PageController, :home)
-
-    get("/drawings", DrawingController, :index)
-    get("/drawings/raw/:id", DrawingController, :show_image, as: :drawing_raw)
   end
 
   scope "/api", KonewWeb do
@@ -72,6 +69,9 @@ defmodule KonewWeb.Router do
     end
 
     post "/users/update-password", UserSessionController, :update_password
+
+    get("/drawings", DrawingController, :index)
+    get("/drawings/raw/:id", DrawingController, :show_image, as: :drawing_raw)
   end
 
   scope "/", KonewWeb do
