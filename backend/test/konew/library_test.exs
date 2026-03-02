@@ -34,7 +34,11 @@ defmodule Konew.LibraryTest do
 
     test "update_drawing/2 with valid data updates the drawing" do
       drawing = drawing_fixture()
-      update_attrs = %{image_data: "some updated image_data", content_type: "some updated content_type"}
+
+      update_attrs = %{
+        image_data: "some updated image_data",
+        content_type: "some updated content_type"
+      }
 
       assert {:ok, %Drawing{} = drawing} = Library.update_drawing(drawing, update_attrs)
       assert drawing.image_data == "some updated image_data"

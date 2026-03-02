@@ -1,0 +1,123 @@
+<div class="mx-auto max-w-sm px-4 py-8">
+  <h1 class="text-xl font-bold mb-4 text-center">Create Drawing</h1>
+
+  <%!-- The Canvas Container --%>
+  <div class="relative bg-white border-2 border-zinc-300 rounded-lg shadow-inner overflow-hidden touch-none">
+    <canvas
+      id="drawing-canvas"
+      width="400"
+      height="400"
+      class="w-full h-auto cursor-crosshair shadow-lg bg-white"
+    >
+    </canvas>
+  </div>
+
+  <%!-- Toolbar --%>
+  <div class="mt-4 flex items-center justify-between gap-2">
+    <div class="flex gap-2">
+      <button
+        id="pen-tool"
+        class="px-4 py-2 bg-zinc-800 text-white rounded-md text-sm active:scale-95"
+      >
+        Pen
+      </button>
+      <button
+        id="eraser-tool"
+        class="px-4 py-2 bg-zinc-200 text-zinc-800 rounded-md text-sm active:scale-95 border border-zinc-300"
+      >
+        Eraser
+      </button>
+    </div>
+    <button id="clear-canvas" class="text-sm text-red-600 font-medium">Clear</button>
+  </div>
+
+  <%!-- Submit Button --%>
+  <button
+    id="post-drawing"
+    class="w-full mt-8 bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-md active:scale-95"
+  >
+    Post Drawing
+  </button>
+</div>
+
+<script>
+  const canvas = document.getElementById('drawing-canvas');
+  const ctx = canvas.getContext('2d');
+  const postBtn = document.getElementById('post-drawing');
+
+  let drawing = false;
+  let color = '#000000';
+  let lineWidth = 3;
+
+  // Initialize Canvas
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
+
+  function getCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    // Handle touch vs mouse
+    const clientX = e.touches ? e.touches[0].clientX : e.clientX;
+    const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
+    };
+  }
+
+  const startDrawing = (e) => {
+    drawing = true;
+    const {x, y} = getCoords(e);
+    ctx.beginPath();
+    ctx.moveTo(x, y);
+  };
+
+  const draw = (e) => {
+    if (!drawing) return;
+    const {x, y} = getCoords(e);
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.lineTo(x, y);
+    ctx.stroke();
+  };
+
+  const stopDrawing = () => { drawing = false; };
+
+  // Event Listeners
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  window.addEventListener('mouseup', stopDrawing);
+
+  canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
+  canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
+  canvas.addEventListener('touchend', stopDrawing);
+
+  // Tools
+  document.getElementById('pen-tool').onclick = () => { color = '#000000'; lineWidth = 3; };
+  document.getElementById('eraser-tool').onclick = () => { color = '#ffffff'; lineWidth = 20; };
+  document.getElementById('clear-canvas').onclick = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+    // Inside your <script> in new.html.heex
+    postBtn.onclick = () => {
+    canvas.toBlob((blob) => {
+        const formData = new FormData();
+        formData.append('drawing', blob, 'drawing.png');
+        formData.append('_csrf_token', '<%= Phoenix.Controller.get_csrf_token() %>');
+
+        fetch('/drawings', {
+        method: 'POST',
+        body: formData,
+        headers: { "Accept": "text/html" } 
+        }).then(res => {
+        if (res.redirected) {
+            window.location.href = res.url;
+        } else if (res.ok) {
+            window.location.href = "/drawings";
+        }
+        });
+    }, 'image/png');
+    };
+</script>
