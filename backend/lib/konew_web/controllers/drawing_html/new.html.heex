@@ -41,110 +41,143 @@
 </div>
 
 <script>
-    const canvas = document.getElementById('drawing-canvas');
-    const ctx = canvas.getContext('2d');
-    const postBtn = document.getElementById('post-drawing');
-    const penWidth = 3;
-    const eraserWidth = 20;
-    const deltaCoords = {x: 0, y: 1};
+  const canvas = document.getElementById('drawing-canvas');
+  const ctx = canvas.getContext('2d');
+  const postBtn = document.getElementById('post-drawing');
 
-    let drawing = false;
-    let color = '#000000';
-    let lineWidth = penWidth;
-    let startCoords = null;
+  // Constants for tools
+  const penWidth = 3;
+  const eraserWidth = 20;
 
-    // Initialize Canvas
-    ctx.lineJoin = 'round';
-    ctx.lineCap = 'round';
+  let drawing = false;
+  let color = '#000000';
+  let lineWidth = penWidth;
+  let startCoords = null;
 
-    function getCoords(e) {
-      const rect = canvas.getBoundingClientRect();
-      const scaleX = canvas.width / rect.width;
-      const scaleY = canvas.height / rect.height;
-      
-      // Handle touch vs mouse
-      const clientX = e.touches ? e.touches[0].clientX : e.clientX;
-      const clientY = e.touches ? e.touches[0].clientY : e.clientY;
+  // Initialize Canvas Style
+  ctx.lineJoin = 'round';
+  ctx.lineCap = 'round';
 
-      return {
-        x: (clientX - rect.left) * scaleX,
-        y: (clientY - rect.top) * scaleY
-      };
-    }
+  /**
+   * Extracts coordinates from Mouse or Touch events.
+   * Uses changedTouches for 'touchend' where 'touches' is empty.
+   */
+  function getCoords(e) {
+    const rect = canvas.getBoundingClientRect();
+    const scaleX = canvas.width / rect.width;
+    const scaleY = canvas.height / rect.height;
+    
+    const touch = (e.touches && e.touches[0]) || (e.changedTouches && e.changedTouches[0]);
+    const clientX = touch ? touch.clientX : e.clientX;
+    const clientY = touch ? touch.clientY : e.clientY;
 
-    const startDrawing = (e) => {
-      drawing = true;
-      startCoords = getCoords(e);
-      ctx.beginPath();
-      ctx.moveTo(startCoords.x, startCoords.y);
+    return {
+      x: (clientX - rect.left) * scaleX,
+      y: (clientY - rect.top) * scaleY
     };
+  }
 
-    const draw = (e) => {
-  //    console.log(ctx);
-      if (!drawing) return;
-      const currentCoords = getCoords(e);
-      doDraw(currentCoords);
-    };
+  const startDrawing = (e) => {
+    drawing = true;
+    startCoords = getCoords(e);
+    
+    ctx.beginPath();
+    ctx.strokeStyle = color;
+    ctx.lineWidth = lineWidth;
+    ctx.moveTo(startCoords.x, startCoords.y);
+  };
 
-    const stopDrawing = (e) => { 
-      const endCoords = getCoords(e);
-      if (equalCoords(startCoords, endCoords)) {
-        let deltaPlusCoords = addCoords(endCoords, deltaCoords);
-        doDraw(deltaPlusCoords);
-      }
-      drawing = false;
-    };
+  const draw = (e) => {
+    if (!drawing) return;
+    const currentCoords = getCoords(e);
+    ctx.lineTo(currentCoords.x, currentCoords.y);
+    ctx.stroke();
+  };
 
-    const doDraw = (coords) => {
-      ctx.strokeStyle = color;
-      ctx.lineWidth = lineWidth;
-      ctx.lineTo(coords.x, coords.y);
+  const stopDrawing = (e) => { 
+    if (!drawing) return;
+    
+    const endCoords = getCoords(e);
+
+    // If the movement was negligible (a tap/click), draw a dot
+    if (isClick(startCoords, endCoords)) {
+      // We move a tiny fraction to force the 'round' lineCap to render a dot
+      ctx.lineTo(endCoords.x + 0.1, endCoords.y + 0.1);
       ctx.stroke();
     }
+    
+    ctx.closePath();
+    drawing = false;
+    startCoords = null;
+  };
 
-    const equalCoords = (left, right) => {
-      if (left == null) return false;
-      if (right == null) return false;
-      if (left.x == null || left.y == null || right.x == null || right.y == null) return false;
-      return (left.x == right.x && left.y == right.y);
-    }
+  /**
+   * Mobile fingers move slightly even on a "tap". 
+   * We allow a 3-pixel margin of error to count as a single point.
+   */
+  const isClick = (start, end) => {
+    if (!start || !end) return false;
+    const distance = Math.sqrt(
+      Math.pow(end.x - start.x, 2) + Math.pow(end.y - start.y, 2)
+    );
+    return distance < 3; 
+  }
 
-    const addCoords = (left, right) => {
-      return {x: left.x + right.x, y: left.y + right.y}
-    }
+  // Event Listeners for Mouse
+  canvas.addEventListener('mousedown', startDrawing);
+  canvas.addEventListener('mousemove', draw);
+  window.addEventListener('mouseup', stopDrawing);
 
-    // Event Listeners
-    canvas.addEventListener('mousedown', startDrawing);
-    canvas.addEventListener('mousemove', draw);
-    window.addEventListener('mouseup', stopDrawing);
+  // Event Listeners for Touch (Mobile)
+  // preventDefault() stops the screen from scrolling while drawing
+  canvas.addEventListener('touchstart', (e) => { 
+    e.preventDefault(); 
+    startDrawing(e); 
+  }, {passive: false});
 
-    canvas.addEventListener('touchstart', (e) => { e.preventDefault(); startDrawing(e); }, {passive: false});
-    canvas.addEventListener('touchmove', (e) => { e.preventDefault(); draw(e); }, {passive: false});
-    canvas.addEventListener('touchend', stopDrawing);
+  canvas.addEventListener('touchmove', (e) => { 
+    e.preventDefault(); 
+    draw(e); 
+  }, {passive: false});
 
-    // Tools
-    document.getElementById('pen-tool').onclick = () => { color = '#000000'; lineWidth = penWidth; };
-    document.getElementById('eraser-tool').onclick = () => { color = '#ffffff'; lineWidth = eraserWidth; };
-    document.getElementById('clear-canvas').onclick = () => ctx.clearRect(0, 0, canvas.width, canvas.height);
+  canvas.addEventListener('touchend', (e) => { 
+    e.preventDefault(); 
+    stopDrawing(e); 
+  }, {passive: false});
 
-    // Inside your <script> in new.html.heex
-    postBtn.onclick = () => {
-      canvas.toBlob((blob) => {
-          const formData = new FormData();
-          formData.append('drawing', blob, 'drawing.png');
-          formData.append('_csrf_token', '<%= Phoenix.Controller.get_csrf_token() %>');
+  // Toolbar Logic
+  document.getElementById('pen-tool').onclick = () => { 
+    color = '#000000'; 
+    lineWidth = penWidth; 
+  };
 
-          fetch('/drawings', {
-          method: 'POST',
-          body: formData,
-          headers: { "Accept": "text/html" } 
-          }).then(res => {
-          if (res.redirected) {
-              window.location.href = res.url;
-          } else if (res.ok) {
-              window.location.href = "/drawings";
-          }
-          });
-      }, 'image/png');
-    };
+  document.getElementById('eraser-tool').onclick = () => { 
+    color = '#ffffff'; 
+    lineWidth = eraserWidth; 
+  };
+
+  document.getElementById('clear-canvas').onclick = () => {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+  };
+
+  // Form Submission Logic
+  postBtn.onclick = () => {
+    canvas.toBlob((blob) => {
+      const formData = new FormData();
+      formData.append('drawing', blob, 'drawing.png');
+      formData.append('_csrf_token', '<%= Phoenix.Controller.get_csrf_token() %>');
+
+      fetch('/drawings', {
+        method: 'POST',
+        body: formData,
+        headers: { "Accept": "text/html" } 
+      }).then(res => {
+        if (res.redirected) {
+          window.location.href = res.url;
+        } else if (res.ok) {
+          window.location.href = "/drawings";
+        }
+      });
+    }, 'image/png');
+  };
 </script>
