@@ -9,7 +9,8 @@ services:
       # Persist mix deps and build artifacts (optional but recommended)
       - elixir-deps:/workspace/deps
       - elixir-build:/workspace/_build
-    
+    ports:
+      - "0.0.0.0:4000:4000"
     command: sleep infinity # Keeps the container running for VS Code
     depends_on:
       - db

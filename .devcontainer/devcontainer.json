@@ -3,6 +3,16 @@
   "dockerComposeFile": "docker-compose.yaml",
   "service": "app", // Tells VS Code which service to enter
   "workspaceFolder": "/workspace",
+  "forwardPorts": [
+    4000
+  ],
+  "portsAttributes": {
+    "4000": {
+      "label": "Phoenix Web Server",
+      "onAutoForward": "notify",
+      "visibility": "public"
+    }
+  },
   "customizations": {
     "vscode": {
       "settings": {
