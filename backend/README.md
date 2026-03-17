@@ -27,7 +27,7 @@ curl -X POST http://localhost:4000/api/drawings \
 ## To Do List
 
 - [x] Post drawings
-- [ ] Drawing view
+- [x] Drawing view
 - [ ] Create user rooms
 - [ ] Join user rooms
 - [ ] Create challenges

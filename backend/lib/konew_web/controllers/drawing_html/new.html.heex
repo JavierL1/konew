@@ -44,6 +44,8 @@
   const canvas = document.getElementById('drawing-canvas');
   const ctx = canvas.getContext('2d');
   const postBtn = document.getElementById('post-drawing');
+  const penBtn = document.getElementById('pen-tool');
+  const eraserBtn = document.getElementById('eraser-tool');
 
   // Constants for tools
   const penWidth = 3;
@@ -123,6 +125,18 @@
     return distance < 3; 
   }
 
+  // Set buttons as active visually
+  const setActiveTool = (tool) => {
+      penBtn.className = "tool-btn px-4 py-2 bg-zinc-200 text-zinc-800 rounded-md text-sm border border-zinc-300";
+      eraserBtn.className = "tool-btn px-4 py-2 bg-zinc-200 text-zinc-800 rounded-md text-sm border border-zinc-300";
+
+      if (tool === 'pen') {
+        penBtn.className = "tool-btn px-4 py-2 bg-indigo-600 text-white rounded-md text-sm shadow-inner font-bold";
+      } else {
+        eraserBtn.className = "tool-btn px-4 py-2 bg-indigo-600 text-white rounded-md text-sm shadow-inner font-bold";
+      }
+    };
+
   // Event Listeners for Mouse
   canvas.addEventListener('mousedown', startDrawing);
   canvas.addEventListener('mousemove', draw);
@@ -146,14 +160,16 @@
   }, {passive: false});
 
   // Toolbar Logic
-  document.getElementById('pen-tool').onclick = () => { 
+  penBtn.onclick = () => { 
     color = '#000000'; 
     lineWidth = penWidth; 
+    setActiveTool('pen');
   };
 
-  document.getElementById('eraser-tool').onclick = () => { 
+  eraserBtn.onclick = () => { 
     color = '#ffffff'; 
     lineWidth = eraserWidth; 
+    setActiveTool('eraser');
   };
 
   document.getElementById('clear-canvas').onclick = () => {
@@ -180,4 +196,6 @@
       });
     }, 'image/png');
   };
+
+  setActiveTool('pen');
 </script>
