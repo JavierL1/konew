@@ -28,7 +28,20 @@
         Eraser
       </button>
     </div>
-    <button id="clear-canvas" class="text-sm text-red-600 font-medium">Clear</button>
+    <div class="flex gap-2">
+      <button
+        id="undo-tool"
+        class="px-4 py-2 bg-zinc-200 text-zinc-800 rounded-md text-sm border border-zinc-300 active:scale-95 transition-all"
+      >
+        Undo
+      </button>
+      <button
+        id="clear-canvas"
+        class="px-4 py-2 bg-zinc-200 text-red-800 rounded-md text-sm border border-zinc-300 active:scale-95 transition-all"
+      >
+        Clear
+      </button>
+    </div>
   </div>
 
   <%!-- Submit Button --%>
@@ -59,6 +72,10 @@
   // Initialize Canvas Style
   ctx.lineJoin = 'round';
   ctx.lineCap = 'round';
+
+  // Initialize History
+  let undoStack = [];
+  const maxHistory = 20; // Limit memory usage
 
   /**
    * Extracts coordinates from Mouse or Touch events.
@@ -111,6 +128,7 @@
     ctx.closePath();
     drawing = false;
     startCoords = null;
+    saveState();
   };
 
   /**
@@ -135,6 +153,33 @@
       } else {
         eraserBtn.className = "tool-btn px-4 py-2 bg-indigo-600 text-white rounded-md text-sm shadow-inner font-bold";
       }
+    };
+
+  // Save current canvas as a data URL string
+  const saveState = () => {
+    if (undoStack.length >= maxHistory) undoStack.shift();
+    undoStack.push(canvas.toDataURL());
+  };
+
+  const undo = () => {
+      if (undoStack.length <= 1) {
+        // If only 1 state left, it's likely the initial blank canvas or first stroke
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        if (undoStack.length === 1) undoStack.pop();
+        return;
+      }
+
+      // Pop the current state (the one we just did)
+      undoStack.pop(); 
+      // Get the previous state
+      const previousState = undoStack[undoStack.length - 1];
+
+      const img = new Image();
+      img.src = previousState;
+      img.onload = () => {
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+        ctx.drawImage(img, 0, 0);
+      };
     };
 
   // Event Listeners for Mouse
@@ -176,6 +221,8 @@
     ctx.clearRect(0, 0, canvas.width, canvas.height);
   };
 
+  document.getElementById('undo-tool').onclick = undo;
+
   // Form Submission Logic
   postBtn.onclick = () => {
     canvas.toBlob((blob) => {
@@ -198,4 +245,5 @@
   };
 
   setActiveTool('pen');
+  saveState();
 </script>
