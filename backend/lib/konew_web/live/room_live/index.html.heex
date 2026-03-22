@@ -1,0 +1,58 @@
+<div class="max-w-2xl mx-auto py-8">
+  <div class="flex justify-between items-center mb-8">
+    <h1 class="text-3xl font-bold">Your Rooms</h1>
+    <.link
+      patch={~p"/rooms/new"}
+      class="bg-black text-white px-4 py-2 rounded-lg hover:opacity-80"
+    >
+      + New Room
+    </.link>
+  </div>
+
+  <div class="grid gap-4">
+    <%= for room <- @rooms do %>
+      <.link
+        navigate={~p"/rooms/#{room.invite_code}"}
+        class="p-4 border rounded-xl hover:bg-gray-50 flex justify-between"
+      >
+        <div>
+          <p class="font-bold text-lg">{room.name}</p>
+          <p class="text-sm text-gray-500 italic">Code: {room.invite_code}</p>
+        </div>
+        <div class="text-right">
+          <span class={if room.is_public, do: "text-green-600", else: "text-blue-600"}>
+            {if room.is_public, do: "Public", else: "Private"}
+          </span>
+        </div>
+      </.link>
+    <% end %>
+  </div>
+</div>
+
+<%!-- The Modal for creating a new room --%>
+<%!-- We check if the live_action is :new to show the modal --%>
+<.modal
+  :if={@live_action in [:new]}
+  id="room-modal"
+  show
+  on_cancel={JS.patch(~p"/rooms")}
+>
+  <.header>
+    New Room
+    <:subtitle>Give your room a name to start collaborating.</:subtitle>
+  </.header>
+
+  <.simple_form for={@form} id="room-form" phx-change="validate" phx-submit="save">
+    <.input
+      field={@form[:name]}
+      type="text"
+      label="Room Name"
+      placeholder="e.g. The Scribble Club"
+    />
+    <.input field={@form[:is_public]} type="checkbox" label="Make this room public?" />
+
+    <:actions>
+      <.button phx-disable-with="Creating...">Create Room</.button>
+    </:actions>
+  </.simple_form>
+</.modal>

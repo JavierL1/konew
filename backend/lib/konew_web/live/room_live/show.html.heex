@@ -1,0 +1,53 @@
+<div class="max-w-5xl mx-auto py-10 px-4">
+  <.header>
+    <span class="text-zinc-900 dark:text-white">{@room.name}</span>
+    <:subtitle>
+      Share this code to invite others:
+      <span class="font-mono font-bold bg-zinc-100 dark:bg-zinc-800 px-2 py-1 rounded text-zinc-900 dark:text-zinc-100">
+        {@room.invite_code}
+      </span>
+    </:subtitle>
+
+    <:actions>
+      <.link
+        navigate={~p"/rooms"}
+        class="text-sm font-semibold leading-6 text-zinc-900 dark:text-zinc-300"
+      >
+        ← Back to all rooms
+      </.link>
+    </:actions>
+  </.header>
+
+  <div class="mt-12 grid grid-cols-1 md:grid-cols-4 gap-8">
+    <div class="md:col-span-1">
+      <h3 class="text-sm font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-4">
+        Members Online
+      </h3>
+      <ul class="space-y-3">
+        <%= for member <- @room.members do %>
+          <li class="flex items-center gap-3">
+            <div class="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold">
+              {String.at(member.email, 0) |> String.upcase()}
+            </div>
+            <span class="text-sm text-zinc-700 dark:text-zinc-300 truncate">
+              {member.email}
+            </span>
+          </li>
+        <% end %>
+      </ul>
+    </div>
+
+    <div class="md:col-span-3">
+      <div class="aspect-video bg-white dark:bg-zinc-900 border-2 border-dashed border-zinc-300 dark:border-zinc-700 rounded-3xl flex items-center justify-center">
+        <div class="text-center">
+          <p class="text-zinc-400 dark:text-zinc-500 italic">
+            Drawing Canvas Surface
+          </p>
+          <p class="text-xs text-zinc-400 mt-2">
+            Real-time synchronization coming soon...
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
