@@ -63,6 +63,27 @@ defmodule Konew.Groups do
     Repo.get_by!(Room, id: id)
   end
 
+  @spec get_rooms_by_owner(integer()) :: list(Room.t())
+  def get_rooms_by_owner(owner_id) do
+    from(
+      room in Room,
+      where: room.owner_id == ^owner_id
+    )
+    |> Konew.Repo.all()
+  end
+
+  def get_rooms_by_member(member_id) do
+    from(
+      room in Room,
+      join: membership in RoomMembership,
+      on: room.id == membership.room_id,
+      where: membership.user_id == ^member_id,
+      select: room,
+      distinct: true
+    )
+    |> Konew.Repo.all()
+  end
+
   @doc """
   Get a single room by its code
   """
@@ -161,6 +182,14 @@ defmodule Konew.Groups do
     attrs_with_owner = Map.put(attrs, "owner_id", scope.user.id)
 
     Room.changeset(room, attrs_with_owner)
+  end
+
+  def join_room(%Scope{} = scope, %Room{} = room) do
+    RoomMembership.changeset(%RoomMembership{}, %{
+      user_id: scope.user.id,
+      room_id: room.id
+    })
+    |> Repo.insert()
   end
 
   defp generate_6_char_code do

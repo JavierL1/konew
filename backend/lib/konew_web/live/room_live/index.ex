@@ -6,8 +6,12 @@ defmodule KonewWeb.RoomLive.Index do
 
   @impl true
   def mount(_params, _session, socket) do
-    # We list the rooms the user is already a member of
-    {:ok, assign(socket, :rooms, Groups.list_rooms())}
+    user_id =
+      socket.assigns.current_scope
+      |> Map.get(:user)
+      |> Map.get(:id)
+
+    {:ok, assign(socket, :rooms, Groups.get_rooms_by_member(user_id))}
   end
 
   @impl true
@@ -23,9 +27,15 @@ defmodule KonewWeb.RoomLive.Index do
     |> assign(:form, to_form(Groups.change_room(socket.assigns.current_scope, %Room{})))
   end
 
+  defp apply_action(socket, :join, _params) do
+    socket
+    |> assign(:page_title, "Join Room")
+    |> assign(:invite_code, "")
+  end
+
   defp apply_action(socket, :index, _params) do
     socket
-    |> assign(:page_title, "My Boxes")
+    |> assign(:page_title, "Your Rooms")
     |> assign(:room, nil)
   end
 
@@ -45,7 +55,7 @@ defmodule KonewWeb.RoomLive.Index do
       {:ok, %{room: room}} ->
         {:noreply,
          socket
-         |> put_flash(:info, "Box created successfully!")
+         |> put_flash(:info, "Room created successfully!")
          |> push_navigate(to: ~p"/rooms/#{room.invite_code}")}
 
       {:error, :room, changeset, _} ->
@@ -53,6 +63,23 @@ defmodule KonewWeb.RoomLive.Index do
 
       _ ->
         {:noreply, put_flash(socket, :error, "Something went wrong.")}
+    end
+  end
+
+  @impl true
+  def handle_event("join", %{"invite_code" => invite_code}, socket) do
+    with %Room{} = room <- Groups.get_room_by_code(invite_code),
+         {:ok, _} <- Groups.join_room(socket.assigns.current_scope, room) do
+      {:noreply,
+       socket
+       |> put_flash(:info, "Room joined successfully!")
+       |> push_navigate(to: ~p"/rooms/#{room.invite_code}")}
+    else
+      nil ->
+        {:noreply, put_flash(socket, :error, "Room not found.")}
+
+      _ ->
+        {:no_reply, put_flash(socket, :error, "Could not join room")}
     end
   end
 end

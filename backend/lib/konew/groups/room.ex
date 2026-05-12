@@ -2,6 +2,17 @@ defmodule Konew.Groups.Room do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t() :: %{
+          name: String.t(),
+          invite_code: String.t(),
+          is_public: boolean(),
+          owner_id: integer(),
+          owner: Konew.Accounts.User.t() | nil,
+          members: list(Konew.Accounts.User.t()) | nil,
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
   schema "rooms" do
     field :name, :string
     field :invite_code, :string
