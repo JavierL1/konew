@@ -198,6 +198,31 @@ defmodule Konew.Engine do
     Session.changeset(session, attrs)
   end
 
+  @doc """
+  Starts a new session for a room using a specific mechanic template.
+  Fails if an active session already exists for the given room.
+  """
+  def start_session_for_room(room_id, mechanic_id) do
+    Repo.transaction(fn ->
+      case Repo.get_by(Session, room_id: room_id) do
+        %Session{} ->
+          Repo.rollback(:session_already_exists)
+
+        nil ->
+          mechanic = Repo.get!(Mechanic, mechanic_id)
+
+          %Session{}
+          |> Session.changeset(%{
+            room_id: room_id,
+            mechanic_id: mechanic_id,
+            config: mechanic.config,
+            state: %{}
+          })
+          |> Repo.insert!()
+      end
+    end)
+  end
+
   alias Konew.Engine.SessionEvent
   alias Konew.Accounts.Scope
 

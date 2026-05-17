@@ -29,7 +29,7 @@ defmodule Konew.Engine.Session do
   @doc false
   def changeset(session, attrs) do
     session
-    |> cast(attrs, [:config, :state])
+    |> cast(attrs, [:room_id, :mechanic_id, :config, :state])
     |> validate_required([])
   end
 end

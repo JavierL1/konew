@@ -7,8 +7,9 @@ defmodule Konew.Groups.Room do
           invite_code: String.t(),
           is_public: boolean(),
           owner_id: integer(),
-          owner: Konew.Accounts.User.t() | nil,
-          members: list(Konew.Accounts.User.t()) | nil,
+          owner: Konew.Accounts.User.t() | Ecto.Association.NotLoaded.t(),
+          members: list(Konew.Accounts.User.t()) | Ecto.Association.NotLoaded.t(),
+          session: Konew.Engine.Session.t() | Ecto.Association.NotLoaded.t(),
           inserted_at: DateTime.t(),
           updated_at: DateTime.t()
         }
@@ -20,6 +21,7 @@ defmodule Konew.Groups.Room do
 
     belongs_to :owner, Konew.Accounts.User, foreign_key: :owner_id
     many_to_many :members, Konew.Accounts.User, join_through: Konew.Groups.RoomMembership
+    has_one :session, Konew.Engine.Session
 
     timestamps(type: :utc_datetime)
   end

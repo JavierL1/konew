@@ -49,6 +49,7 @@ defmodule KonewWeb.Router do
       live "/rooms/new", RoomLive.Index, :new
       live "/rooms/join", RoomLive.Index, :join
       live "/rooms/:invite_code", RoomLive.Show, :show
+      live "/rooms/:invite_code/mechanics", RoomLive.Show, :select_mechanic
     end
   end
 
