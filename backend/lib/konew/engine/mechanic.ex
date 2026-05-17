@@ -18,6 +18,7 @@ defmodule Konew.Engine.Mechanic do
     field :type, :string
     field :description, :string
     field :config, :map
+
     has_many :sessions, Konew.Engine.Session
 
     timestamps(type: :utc_datetime)
@@ -27,6 +28,6 @@ defmodule Konew.Engine.Mechanic do
   def changeset(mechanic, attrs) do
     mechanic
     |> cast(attrs, [:name, :type, :description, :config])
-    |> validate_required([:name, :description])
+    |> validate_required([:name, :type, :description])
   end
 end

@@ -1,0 +1,160 @@
+defmodule Konew.Engine.Mechanic do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  @type t() :: %__MODULE__{
+          id: integer(),
+          name: String.t(),
+          type: String.t(),
+          description: String.t(),
+          config: map(),
+          sessions: list(Konew.Engine.Session.t()) | Ecto.Association.NotLoaded.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
+  schema "mechanics" do
+    field :name, :string
+    field :type, :string
+    field :description, :string
+    field :config, :map
+    has_many :sessions, Konew.Engine.Session
+
+    timestamps(type: :utc_datetime)
+  end
+
+  @doc false
+  def changeset(mechanic, attrs) do
+    mechanic
+    |> cast(attrs, [:name, :type, :description, :config])
+    |> validate_required([:name, :description])
+  end
+end
+
+defmodule Konew.Repo.Migrations.CreateMechanics do
+  use Ecto.Migration
+
+  def change do
+    create table(:mechanics) do
+      add :name, :string
+      add :type, :string, null: false, default: "default"
+      add :description, :text
+      add :config, :map, null: false, default: "{}"
+
+      timestamps(type: :utc_datetime)
+    end
+  end
+end
+
+
+defmodule Konew.Engine.Session do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  @type t() :: %__MODULE__{
+          id: integer(),
+          config: map(),
+          state: map(),
+          room_id: integer(),
+          room: Konew.Groups.Room.t() | Ecto.Association.NotLoaded.t(),
+          mechanic_id: integer(),
+          mechanic: Konew.Engine.Mechanic.t() | Ecto.Association.NotLoaded.t(),
+          events: list(Konew.Engine.SessionEvent.t()) | Ecto.Association.NotLoaded.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
+  schema "sessions" do
+    field :config, :map
+    field :state, :map
+
+    belongs_to :room, Konew.Groups.Room
+    belongs_to :mechanic, Konew.Engine.Mechanic
+    has_many :events, Konew.Engine.SessionEvent
+
+    timestamps(type: :utc_datetime)
+  end
+
+  @doc false
+  def changeset(session, attrs) do
+    session
+    |> cast(attrs, [:config, :state])
+    |> validate_required([])
+  end
+end
+
+defmodule Konew.Repo.Migrations.CreateSessions do
+  use Ecto.Migration
+
+  def change do
+    create table(:sessions) do
+      add :config, :map, null: false, default: "{}"
+      add :state, :map, null: false, default: "{}"
+      add :room_id, references(:rooms, on_delete: :delete_all)
+      add :mechanic_id, references(:mechanics, on_delete: :nothing)
+
+      timestamps(type: :utc_datetime)
+    end
+
+    create index(:sessions, [:room_id])
+    create index(:sessions, [:mechanic_id])
+  end
+end
+
+
+defmodule Konew.Engine.SessionEvent do
+  use Ecto.Schema
+  import Ecto.Changeset
+
+  @type t() :: %__MODULE__{
+          id: integer(),
+          type: String.t(),
+          data: map(),
+          sequence_number: integer(),
+          session_id: integer(),
+          session: Konew.Engine.Session.t() | Ecto.Association.NotLoaded.t(),
+          user_id: integer(),
+          user: Konew.Accounts.User.t() | Ecto.Association.NotLoaded.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
+  schema "session_events" do
+    field :type, :string
+    field :data, :map
+    field :sequence_number, :integer
+
+    belongs_to :session, Konew.Engine.Session
+    belongs_to :user, Konew.Accounts.User
+
+    timestamps(type: :utc_datetime)
+  end
+
+  @doc false
+  def changeset(session_event, attrs, user_scope) do
+    session_event
+    |> cast(attrs, [:type, :data, :sequence_number])
+    |> validate_required([:type, :sequence_number])
+    |> put_change(:user_id, user_scope.user.id)
+  end
+end
+
+defmodule Konew.Repo.Migrations.CreateSessionEvents do
+  use Ecto.Migration
+
+  def change do
+    create table(:session_events) do
+      add :type, :string, null: false
+      add :data, :map, null: false, default: "{}"
+      add :sequence_number, :integer, null: false
+      add :session_id, references(:sessions, on_delete: :delete_all), null: false
+      add :user_id, references(:users, on_delete: :nilify_all), null: true
+
+      timestamps(type: :utc_datetime, updated_at: false)
+    end
+
+    create unique_index(:session_events, [:session_id, :sequence_number])
+    create index(:session_events, [:session_id])
+    create index(:session_events, [:user_id])
+  end
+end

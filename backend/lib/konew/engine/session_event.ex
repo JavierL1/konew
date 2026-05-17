@@ -11,8 +11,7 @@ defmodule Konew.Engine.SessionEvent do
           session: Konew.Engine.Session.t() | Ecto.Association.NotLoaded.t(),
           user_id: integer(),
           user: Konew.Accounts.User.t() | Ecto.Association.NotLoaded.t(),
-          inserted_at: DateTime.t(),
-          updated_at: DateTime.t()
+          inserted_at: DateTime.t()
         }
 
   schema "session_events" do
@@ -23,7 +22,7 @@ defmodule Konew.Engine.SessionEvent do
     belongs_to :session, Konew.Engine.Session
     belongs_to :user, Konew.Accounts.User
 
-    timestamps(type: :utc_datetime)
+    timestamps(type: :utc_datetime, updated_at: false)
   end
 
   @doc false
