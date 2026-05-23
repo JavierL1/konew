@@ -2,7 +2,7 @@ defmodule Konew.Engine.Session do
   use Ecto.Schema
   import Ecto.Changeset
 
-    @type t() :: %__MODULE__{
+  @type t() :: %__MODULE__{
           id: integer(),
           config: map(),
           state: map(),

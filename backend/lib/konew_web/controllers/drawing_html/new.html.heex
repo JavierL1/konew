@@ -1,56 +1,9 @@
 <div class="mx-auto max-w-sm px-4 py-8">
-  <h1 class="text-xl font-bold mb-4 text-center">Create Drawing</h1>
-
-  <%!-- The Canvas Container --%>
-  <div class="relative bg-white border-2 border-zinc-300 rounded-lg shadow-inner overflow-hidden touch-none">
-    <canvas
-      id="drawing-canvas"
-      width="400"
-      height="400"
-      class="w-full h-auto cursor-crosshair shadow-lg bg-white"
-    >
-    </canvas>
-  </div>
-
-  <%!-- Toolbar --%>
-  <div class="mt-4 flex items-center justify-between gap-2">
-    <div class="flex gap-2">
-      <button
-        id="pen-tool"
-        class="px-4 py-2 bg-zinc-800 text-white rounded-md text-sm active:scale-95"
-      >
-        Pen
-      </button>
-      <button
-        id="eraser-tool"
-        class="px-4 py-2 bg-zinc-200 text-zinc-800 rounded-md text-sm active:scale-95 border border-zinc-300"
-      >
-        Eraser
-      </button>
-    </div>
-    <div class="flex gap-2">
-      <button
-        id="undo-tool"
-        class="px-4 py-2 bg-zinc-200 text-zinc-800 rounded-md text-sm border border-zinc-300 active:scale-95 transition-all"
-      >
-        Undo
-      </button>
-      <button
-        id="clear-canvas"
-        class="px-4 py-2 bg-zinc-200 text-red-800 rounded-md text-sm border border-zinc-300 active:scale-95 transition-all"
-      >
-        Clear
-      </button>
-    </div>
-  </div>
-
-  <%!-- Submit Button --%>
-  <button
-    id="post-drawing"
-    class="w-full mt-8 bg-indigo-600 text-white py-3 rounded-xl font-bold hover:bg-indigo-700 transition-colors shadow-md active:scale-95"
-  >
-    Post Drawing
-  </button>
+  <!-- Render the exact same component without a LiveView phx-hook -->
+  <KonewWeb.WhiteboardComponents.whiteboard 
+    id="standalone-canvas-root"
+    submit_label="Post Drawing" 
+  />
 </div>
 
 <script>

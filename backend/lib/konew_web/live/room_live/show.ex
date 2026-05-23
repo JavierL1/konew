@@ -53,7 +53,9 @@ defmodule KonewWeb.RoomLive.Show do
     case Engine.start_session_for_room(room.id, mech_id) do
       {:ok, _session} ->
         # Reload the room aggregate from the database to reflect the new state
-        updated_room = Groups.get_room_by_code(room.invite_code) |> Konew.Repo.preload([:members, session: :mechanic])
+        updated_room =
+          Groups.get_room_by_code(room.invite_code)
+          |> Konew.Repo.preload([:members, session: :mechanic])
 
         {:noreply,
          socket
@@ -64,7 +66,10 @@ defmodule KonewWeb.RoomLive.Show do
       {:error, :session_already_exists} ->
         {:noreply,
          socket
-         |> put_flash(:error, "This room already has an active session. Resetting must be explicit!")
+         |> put_flash(
+           :error,
+           "This room already has an active session. Resetting must be explicit!"
+         )
          |> push_patch(to: ~p"/rooms/#{room.invite_code}")}
 
       {:error, _changeset} ->
