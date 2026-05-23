@@ -16,11 +16,19 @@
   "customizations": {
     "vscode": {
       "settings": {
-        "elixirLS.projectDir": "backend"
+        "elixirLS.projectDir": "backend",
+        "tailwindCSS.includeLanguages": {
+          "elixir": "html",
+          "phoenix-heex": "html"
+        },
+        "emmet.includeLanguages": {
+          "phoenix-heex": "html"
+        }
       },
       "extensions": [
         "JakeBecker.elixir-ls",
-        "phoenixframework.phoenix"
+        "phoenixframework.phoenix",
+        "bradlc.vscode-tailwindcss"
       ]
     }
   },

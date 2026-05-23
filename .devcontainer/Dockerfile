@@ -2,7 +2,8 @@
 FROM elixir:1.19-alpine
 
 # Install build dependencies + inotify-tools for Phoenix hot-reloading
-RUN apk add --no-cache build-base git bash inotify-tools
+RUN apk add --no-cache build-base git bash inotify-tools 
+RUN apk add --update nodejs npm
 
 ARG USERNAME=vscode
 RUN adduser -D $USERNAME
