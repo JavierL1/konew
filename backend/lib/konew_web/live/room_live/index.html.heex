@@ -104,13 +104,15 @@
       label="Invite Code"
       placeholder="e.g. ABCDEF"
       maxlength="6"
-      class="uppercase"
+      class="uppercase w-full input"
       required
     />
 
     <:actions>
       <%!-- This now matches your "Create Room" button style exactly --%>
-      <.button class="w-full" phx-disable-with="Joining...">Join Room</.button>
+      <.button phx-disable-with="Joining...">
+        Join Room
+      </.button>
     </:actions>
   </.simple_form>
 </.modal>
