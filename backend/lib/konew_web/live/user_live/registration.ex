@@ -14,7 +14,10 @@ defmodule KonewWeb.UserLive.Registration do
             Register for an account
             <:subtitle>
               Already registered?
-              <.link navigate={~p"/users/log-in"} class="font-semibold text-brand hover:underline">
+              <.link
+                navigate={~p"/users/log-in"}
+                class="font-semibold text-brand hover:underline"
+              >
                 Log in
               </.link>
               to your account now.
@@ -22,7 +25,12 @@ defmodule KonewWeb.UserLive.Registration do
           </.header>
         </div>
 
-        <.form for={@form} id="registration_form" phx-submit="save" phx-change="validate">
+        <.form
+          for={@form}
+          id="registration_form"
+          phx-submit="save"
+          phx-change="validate"
+        >
           <.input
             field={@form[:email]}
             type="email"
@@ -32,7 +40,10 @@ defmodule KonewWeb.UserLive.Registration do
             phx-mounted={JS.focus()}
           />
 
-          <.button phx-disable-with="Creating account..." class="btn btn-primary w-full">
+          <.button
+            phx-disable-with="Creating account..."
+            class="btn btn-primary w-full"
+          >
             Create an account
           </.button>
         </.form>
@@ -42,7 +53,11 @@ defmodule KonewWeb.UserLive.Registration do
   end
 
   @impl true
-  def mount(_params, _session, %{assigns: %{current_scope: %{user: user}}} = socket)
+  def mount(
+        _params,
+        _session,
+        %{assigns: %{current_scope: %{user: user}}} = socket
+      )
       when not is_nil(user) do
     {:ok, redirect(socket, to: KonewWeb.UserAuth.signed_in_path(socket))}
   end
@@ -77,7 +92,9 @@ defmodule KonewWeb.UserLive.Registration do
   end
 
   def handle_event("validate", %{"user" => user_params}, socket) do
-    changeset = Accounts.change_user_email(%User{}, user_params, validate_unique: false)
+    changeset =
+      Accounts.change_user_email(%User{}, user_params, validate_unique: false)
+
     {:noreply, assign_form(socket, Map.put(changeset, :action, :validate))}
   end
 

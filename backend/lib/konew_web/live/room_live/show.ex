@@ -17,10 +17,13 @@ defmodule KonewWeb.RoomLive.Show do
         # Preload members along with the session and its nested mechanic blueprint
         room = Konew.Repo.preload(room, [:members, session: :mechanic])
 
+        drawings = fetch_room_drawings(room)
+
         {:ok,
          socket
          |> assign(:room, room)
-         |> assign(:mechanics, [])}
+         |> assign(:mechanics, [])
+         |> assign(:drawings, drawings)}
     end
   end
 
@@ -75,5 +78,42 @@ defmodule KonewWeb.RoomLive.Show do
       {:error, _changeset} ->
         {:noreply, put_flash(socket, :error, "Could not initialize mechanic.")}
     end
+  end
+
+  @impl true
+  def handle_event("submit-drawing", %{"image-data" => image_data}, socket) do
+    room = socket.assigns.room
+
+    ["data:" <> content_type_and_encoding, base64_data] = String.split(image_data, ",", parts: 2)
+    [content_type, "base64"] = String.split(content_type_and_encoding, ";", parts: 2)
+    raw_image_binary = Base.decode64!(base64_data)
+
+    %{
+      image_data: raw_image_binary,
+      content_type: content_type,
+      user_id: socket.assigns.current_scope.user.id
+    }
+    |> Konew.Library.create_drawing()
+    |> case do
+      {:ok, _drawing} ->
+        drawings = fetch_room_drawings(room)
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Drawing posted successfully!")
+         |> assign(:drawings, drawings)
+         |> push_patch(to: ~p"/rooms/#{room.invite_code}")}
+
+      {:error, _changeset} ->
+        {:noreply, put_flash(socket, :error, "Could not post drawing.")}
+    end
+  end
+
+  defp fetch_room_drawings(_room) do
+    Konew.Library.list_drawings()
+    |> Konew.Repo.preload([:user])
+    |> Enum.map(fn drawing ->
+      Map.put(drawing, :human_timestamp, Konew.Format.human_date(drawing.inserted_at))
+    end)
   end
 end

@@ -20,7 +20,9 @@ defmodule Konew.Groups.Room do
     field :is_public, :boolean, default: false
 
     belongs_to :owner, Konew.Accounts.User, foreign_key: :owner_id
+
     many_to_many :members, Konew.Accounts.User, join_through: Konew.Groups.RoomMembership
+
     has_one :session, Konew.Engine.Session
 
     timestamps(type: :utc_datetime)

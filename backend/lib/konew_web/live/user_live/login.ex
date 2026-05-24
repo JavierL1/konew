@@ -80,7 +80,11 @@ defmodule KonewWeb.UserLive.Login do
             label="Password"
             autocomplete="current-password"
           />
-          <.button class="btn btn-primary w-full" name={@form[:remember_me].name} value="true">
+          <.button
+            class="btn btn-primary w-full"
+            name={@form[:remember_me].name}
+            value="true"
+          >
             Log in and stay logged in <span aria-hidden="true">→</span>
           </.button>
           <.button class="btn btn-primary btn-soft w-full mt-2">
@@ -96,7 +100,11 @@ defmodule KonewWeb.UserLive.Login do
   def mount(_params, _session, socket) do
     email =
       Phoenix.Flash.get(socket.assigns.flash, :email) ||
-        get_in(socket.assigns, [:current_scope, Access.key(:user), Access.key(:email)])
+        get_in(socket.assigns, [
+          :current_scope,
+          Access.key(:user),
+          Access.key(:email)
+        ])
 
     form = to_form(%{"email" => email}, as: "user")
 

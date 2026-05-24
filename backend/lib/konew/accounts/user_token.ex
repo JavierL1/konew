@@ -59,7 +59,14 @@ defmodule Konew.Accounts.UserToken do
   def build_session_token(user) do
     token = :crypto.strong_rand_bytes(@rand_size)
     dt = user.authenticated_at || DateTime.utc_now(:second)
-    {token, %UserToken{token: token, context: "session", user_id: user.id, authenticated_at: dt}}
+
+    {token,
+     %UserToken{
+       token: token,
+       context: "session",
+       user_id: user.id,
+       authenticated_at: dt
+     }}
   end
 
   @doc """
@@ -93,7 +100,8 @@ defmodule Konew.Accounts.UserToken do
   Users can easily adapt the existing code to provide other types of delivery methods,
   for example, by phone numbers.
   """
-  @spec build_email_token(Konew.Accounts.User.t(), String.t()) :: {binary(), UserToken.t()}
+  @spec build_email_token(Konew.Accounts.User.t(), String.t()) ::
+          {binary(), UserToken.t()}
   def build_email_token(user, context) do
     build_hashed_token(user, context, user.email)
   end
@@ -115,7 +123,9 @@ defmodule Konew.Accounts.UserToken do
         query =
           from token in by_token_and_context_query(hashed_token, "login"),
             join: user in assoc(token, :user),
-            where: token.inserted_at > ago(^@magic_link_validity_in_minutes, "minute"),
+            where:
+              token.inserted_at >
+                ago(^@magic_link_validity_in_minutes, "minute"),
             where: token.sent_to == user.email,
             select: {user, token}
 

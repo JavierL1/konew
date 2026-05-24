@@ -45,7 +45,9 @@ defmodule KonewWeb.DrawingController do
       "json" ->
         conn
         |> put_status(:unprocessable_entity)
-        |> json(%{errors: Ecto.Changeset.traverse_errors(changeset, &translate_error/1)})
+        |> json(%{
+          errors: Ecto.Changeset.traverse_errors(changeset, &translate_error/1)
+        })
 
       _ ->
         conn

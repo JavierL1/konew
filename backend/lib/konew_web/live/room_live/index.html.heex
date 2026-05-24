@@ -72,14 +72,23 @@
     <:subtitle>Give your room a name to start collaborating.</:subtitle>
   </.header>
 
-  <.simple_form for={@form} id="new-room-form" phx-change="validate" phx-submit="save">
+  <.simple_form
+    for={@form}
+    id="new-room-form"
+    phx-change="validate"
+    phx-submit="save"
+  >
     <.input
       field={@form[:name]}
       type="text"
       label="Room Name"
       placeholder="e.g. The Scribble Club"
     />
-    <.input field={@form[:is_public]} type="checkbox" label="Make this room public?" />
+    <.input
+      field={@form[:is_public]}
+      type="checkbox"
+      label="Make this room public?"
+    />
 
     <:actions>
       <.button phx-disable-with="Creating...">Create Room</.button>
@@ -89,7 +98,12 @@
 
 <%!-- The Modal for joining a room --%>
 <%!-- We check if the live_action is :join to show the modal --%>
-<.modal :if={@live_action == :join} id="join-modal" show on_cancel={JS.patch(~p"/rooms")}>
+<.modal
+  :if={@live_action == :join}
+  id="join-modal"
+  show
+  on_cancel={JS.patch(~p"/rooms")}
+>
   <.header>
     Join a Room
     <:subtitle>Enter the 6-character invite code shared with you.</:subtitle>

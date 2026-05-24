@@ -7,7 +7,8 @@ defmodule Konew.GroupsFixtures do
   @doc """
   Generate a unique room invite_code.
   """
-  def unique_room_invite_code, do: "some invite_code#{System.unique_integer([:positive])}"
+  def unique_room_invite_code,
+    do: "some invite_code#{System.unique_integer([:positive])}"
 
   @doc """
   Generate a room.

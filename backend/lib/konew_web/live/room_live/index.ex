@@ -24,7 +24,10 @@ defmodule KonewWeb.RoomLive.Index do
     socket
     |> assign(:page_title, "New Room")
     |> assign(:room, %Room{})
-    |> assign(:form, to_form(Groups.change_room(socket.assigns.current_scope, %Room{})))
+    |> assign(
+      :form,
+      to_form(Groups.change_room(socket.assigns.current_scope, %Room{}))
+    )
   end
 
   defp apply_action(socket, :join, _params) do

@@ -14,6 +14,7 @@ defmodule KonewWeb.WhiteboardComponents do
       id={@id}
       phx-hook={@hook}
       class="mx-auto max-w-sm bg-white dark:bg-zinc-950 p-6 rounded-2xl border border-zinc-200 dark:border-zinc-800 shadow-md"
+      phx-update="ignore"
     >
       <h1 class="text-xl font-bold mb-4 text-center text-zinc-900 dark:text-white">Create Drawing</h1>
 
@@ -34,7 +35,7 @@ defmodule KonewWeb.WhiteboardComponents do
           <button
             id="pen-tool"
             type="button"
-            class="px-3 py-1.5 bg-zinc-800 text-white rounded-md text-xs active:scale-95"
+            class="px-3 py-1.5 bg-zinc-800 text-white rounded-md text-xs font-bold active:scale-95"
           >
             Pen
           </button>

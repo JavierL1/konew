@@ -51,7 +51,11 @@ defmodule KonewWeb.UserLive.LoginTest do
 
       form =
         form(lv, "#login_form_password",
-          user: %{email: user.email, password: valid_user_password(), remember_me: true}
+          user: %{
+            email: user.email,
+            password: valid_user_password(),
+            remember_me: true
+          }
         )
 
       conn = submit_form(form, conn)
@@ -59,9 +63,10 @@ defmodule KonewWeb.UserLive.LoginTest do
       assert redirected_to(conn) == ~p"/"
     end
 
-    test "redirects to login page with a flash error if credentials are invalid", %{
-      conn: conn
-    } do
+    test "redirects to login page with a flash error if credentials are invalid",
+         %{
+           conn: conn
+         } do
       {:ok, lv, _html} = live(conn, ~p"/users/log-in")
 
       form =
@@ -70,13 +75,17 @@ defmodule KonewWeb.UserLive.LoginTest do
       render_submit(form, %{user: %{remember_me: true}})
 
       conn = follow_trigger_action(form, conn)
-      assert Phoenix.Flash.get(conn.assigns.flash, :error) == "Invalid email or password"
+
+      assert Phoenix.Flash.get(conn.assigns.flash, :error) ==
+               "Invalid email or password"
+
       assert redirected_to(conn) == ~p"/users/log-in"
     end
   end
 
   describe "login navigation" do
-    test "redirects to registration page when the Register button is clicked", %{conn: conn} do
+    test "redirects to registration page when the Register button is clicked",
+         %{conn: conn} do
       {:ok, lv, _html} = live(conn, ~p"/users/log-in")
 
       {:ok, _login_live, login_html} =

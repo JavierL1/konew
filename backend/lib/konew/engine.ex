@@ -245,7 +245,11 @@ defmodule Konew.Engine do
   defp broadcast_session_event(%Scope{} = scope, message) do
     key = scope.user.id
 
-    Phoenix.PubSub.broadcast(Konew.PubSub, "user:#{key}:session_events", message)
+    Phoenix.PubSub.broadcast(
+      Konew.PubSub,
+      "user:#{key}:session_events",
+      message
+    )
   end
 
   @doc """
@@ -313,7 +317,11 @@ defmodule Konew.Engine do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_session_event(%Scope{} = scope, %SessionEvent{} = session_event, attrs) do
+  def update_session_event(
+        %Scope{} = scope,
+        %SessionEvent{} = session_event,
+        attrs
+      ) do
     true = session_event.user_id == scope.user.id
 
     with {:ok, session_event = %SessionEvent{}} <-
@@ -356,7 +364,11 @@ defmodule Konew.Engine do
       %Ecto.Changeset{data: %SessionEvent{}}
 
   """
-  def change_session_event(%Scope{} = scope, %SessionEvent{} = session_event, attrs \\ %{}) do
+  def change_session_event(
+        %Scope{} = scope,
+        %SessionEvent{} = session_event,
+        attrs \\ %{}
+      ) do
     true = session_event.user_id == scope.user.id
 
     SessionEvent.changeset(session_event, attrs, scope)

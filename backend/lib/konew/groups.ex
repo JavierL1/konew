@@ -193,7 +193,8 @@ defmodule Konew.Groups do
   end
 
   defp generate_6_char_code do
-    alphabet = "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" |> String.split("", trim: true)
+    alphabet =
+      "ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789" |> String.split("", trim: true)
 
     1..6
     |> Enum.map(fn _ -> Enum.random(alphabet) end)

@@ -82,7 +82,10 @@ defmodule KonewWeb.UserAuth do
       conn = fetch_cookies(conn, signed: [@remember_me_cookie])
 
       if token = conn.cookies[@remember_me_cookie] do
-        {token, conn |> put_token_in_session(token) |> put_session(:user_remember_me, true)}
+        {token,
+         conn
+         |> put_token_in_session(token)
+         |> put_session(:user_remember_me, true)}
       else
         nil
       end
@@ -91,7 +94,8 @@ defmodule KonewWeb.UserAuth do
 
   # Reissue the session token if it is older than the configured reissue age.
   defp maybe_reissue_user_session_token(conn, user, token_inserted_at) do
-    token_age = DateTime.diff(DateTime.utc_now(:second), token_inserted_at, :day)
+    token_age =
+      DateTime.diff(DateTime.utc_now(:second), token_inserted_at, :day)
 
     if token_age >= @session_reissue_age_in_days do
       create_or_extend_session(conn, user, %{})
@@ -120,7 +124,8 @@ defmodule KonewWeb.UserAuth do
 
   # Do not renew session if the user is already logged in
   # to prevent CSRF errors or data being lost in tabs that are still open
-  defp renew_session(conn, user) when conn.assigns.current_scope.user.id == user.id do
+  defp renew_session(conn, user)
+       when conn.assigns.current_scope.user.id == user.id do
     conn
   end
 
@@ -148,8 +153,13 @@ defmodule KonewWeb.UserAuth do
     |> clear_session()
   end
 
-  defp maybe_write_remember_me_cookie(conn, token, %{"remember_me" => "true"}, _),
-    do: write_remember_me_cookie(conn, token)
+  defp maybe_write_remember_me_cookie(
+         conn,
+         token,
+         %{"remember_me" => "true"},
+         _
+       ),
+       do: write_remember_me_cookie(conn, token)
 
   defp maybe_write_remember_me_cookie(conn, token, _params, true),
     do: write_remember_me_cookie(conn, token)
@@ -177,7 +187,8 @@ defmodule KonewWeb.UserAuth do
     end)
   end
 
-  defp user_session_topic(token), do: "users_sessions:#{Base.url_encode64(token)}"
+  defp user_session_topic(token),
+    do: "users_sessions:#{Base.url_encode64(token)}"
 
   @doc """
   Handles mounting and authenticating the current_scope in LiveViews.
@@ -223,7 +234,10 @@ defmodule KonewWeb.UserAuth do
     else
       socket =
         socket
-        |> Phoenix.LiveView.put_flash(:error, "You must log in to access this page.")
+        |> Phoenix.LiveView.put_flash(
+          :error,
+          "You must log in to access this page."
+        )
         |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
 
       {:halt, socket}
@@ -238,7 +252,10 @@ defmodule KonewWeb.UserAuth do
     else
       socket =
         socket
-        |> Phoenix.LiveView.put_flash(:error, "You must re-authenticate to access this page.")
+        |> Phoenix.LiveView.put_flash(
+          :error,
+          "You must re-authenticate to access this page."
+        )
         |> Phoenix.LiveView.redirect(to: ~p"/users/log-in")
 
       {:halt, socket}
@@ -258,7 +275,9 @@ defmodule KonewWeb.UserAuth do
 
   @doc "Returns the path to redirect to after log in."
   # the user was already logged in, redirect to settings
-  def signed_in_path(%Plug.Conn{assigns: %{current_scope: %Scope{user: %Accounts.User{}}}}) do
+  def signed_in_path(%Plug.Conn{
+        assigns: %{current_scope: %Scope{user: %Accounts.User{}}}
+      }) do
     ~p"/users/settings"
   end
 

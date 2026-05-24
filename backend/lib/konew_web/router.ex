@@ -43,13 +43,17 @@ defmodule KonewWeb.Router do
     live_session :require_authenticated_user,
       on_mount: [{KonewWeb.UserAuth, :require_authenticated}] do
       live "/users/settings", UserLive.Settings, :edit
-      live "/users/settings/confirm-email/:token", UserLive.Settings, :confirm_email
+
+      live "/users/settings/confirm-email/:token",
+           UserLive.Settings,
+           :confirm_email
 
       live "/rooms", RoomLive.Index, :index
       live "/rooms/new", RoomLive.Index, :new
       live "/rooms/join", RoomLive.Index, :join
       live "/rooms/:invite_code", RoomLive.Show, :show
       live "/rooms/:invite_code/mechanics", RoomLive.Show, :select_mechanic
+      live "/rooms/:invite_code/draw", RoomLive.Show, :draw
     end
   end
 

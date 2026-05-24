@@ -63,7 +63,8 @@ defmodule Konew.AccountsFixtures do
     token
   end
 
-  def override_token_authenticated_at(token, authenticated_at) when is_binary(token) do
+  def override_token_authenticated_at(token, authenticated_at)
+      when is_binary(token) do
     Konew.Repo.update_all(
       from(t in Accounts.UserToken,
         where: t.token == ^token
@@ -73,7 +74,9 @@ defmodule Konew.AccountsFixtures do
   end
 
   def generate_user_magic_link_token(user) do
-    {encoded_token, user_token} = Accounts.UserToken.build_email_token(user, "login")
+    {encoded_token, user_token} =
+      Accounts.UserToken.build_email_token(user, "login")
+
     Konew.Repo.insert!(user_token)
     {encoded_token, user_token.token}
   end

@@ -36,7 +36,8 @@ defmodule Konew.EngineTest do
     end
 
     test "create_mechanic/1 with invalid data returns error changeset" do
-      assert {:error, %Ecto.Changeset{}} = Engine.create_mechanic(@invalid_attrs)
+      assert {:error, %Ecto.Changeset{}} =
+               Engine.create_mechanic(@invalid_attrs)
     end
 
     test "update_mechanic/2 with valid data updates the mechanic" do
@@ -49,7 +50,9 @@ defmodule Konew.EngineTest do
         description: "some updated description"
       }
 
-      assert {:ok, %Mechanic{} = mechanic} = Engine.update_mechanic(mechanic, update_attrs)
+      assert {:ok, %Mechanic{} = mechanic} =
+               Engine.update_mechanic(mechanic, update_attrs)
+
       assert mechanic.name == "some updated name"
       assert mechanic.type == "some updated type"
       assert mechanic.config == %{}
@@ -58,14 +61,20 @@ defmodule Konew.EngineTest do
 
     test "update_mechanic/2 with invalid data returns error changeset" do
       mechanic = mechanic_fixture()
-      assert {:error, %Ecto.Changeset{}} = Engine.update_mechanic(mechanic, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Engine.update_mechanic(mechanic, @invalid_attrs)
+
       assert mechanic == Engine.get_mechanic!(mechanic.id)
     end
 
     test "delete_mechanic/1 deletes the mechanic" do
       mechanic = mechanic_fixture()
       assert {:ok, %Mechanic{}} = Engine.delete_mechanic(mechanic)
-      assert_raise Ecto.NoResultsError, fn -> Engine.get_mechanic!(mechanic.id) end
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Engine.get_mechanic!(mechanic.id)
+      end
     end
 
     test "change_mechanic/1 returns a mechanic changeset" do
@@ -107,21 +116,29 @@ defmodule Konew.EngineTest do
       session = session_fixture()
       update_attrs = %{state: %{}, config: %{}}
 
-      assert {:ok, %Session{} = session} = Engine.update_session(session, update_attrs)
+      assert {:ok, %Session{} = session} =
+               Engine.update_session(session, update_attrs)
+
       assert session.state == %{}
       assert session.config == %{}
     end
 
     test "update_session/2 with invalid data returns error changeset" do
       session = session_fixture()
-      assert {:error, %Ecto.Changeset{}} = Engine.update_session(session, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Engine.update_session(session, @invalid_attrs)
+
       assert session == Engine.get_session!(session.id)
     end
 
     test "delete_session/1 deletes the session" do
       session = session_fixture()
       assert {:ok, %Session{}} = Engine.delete_session(session)
-      assert_raise Ecto.NoResultsError, fn -> Engine.get_session!(session.id) end
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Engine.get_session!(session.id)
+      end
     end
 
     test "change_session/1 returns a session changeset" do
@@ -173,13 +190,20 @@ defmodule Konew.EngineTest do
 
     test "create_session_event/2 with invalid data returns error changeset" do
       scope = user_scope_fixture()
-      assert {:error, %Ecto.Changeset{}} = Engine.create_session_event(scope, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Engine.create_session_event(scope, @invalid_attrs)
     end
 
     test "update_session_event/3 with valid data updates the session_event" do
       scope = user_scope_fixture()
       session_event = session_event_fixture(scope)
-      update_attrs = %{data: %{}, type: "some updated type", sequence_number: 43}
+
+      update_attrs = %{
+        data: %{},
+        type: "some updated type",
+        sequence_number: 43
+      }
 
       assert {:ok, %SessionEvent{} = session_event} =
                Engine.update_session_event(scope, session_event, update_attrs)
@@ -212,7 +236,9 @@ defmodule Konew.EngineTest do
     test "delete_session_event/2 deletes the session_event" do
       scope = user_scope_fixture()
       session_event = session_event_fixture(scope)
-      assert {:ok, %SessionEvent{}} = Engine.delete_session_event(scope, session_event)
+
+      assert {:ok, %SessionEvent{}} =
+               Engine.delete_session_event(scope, session_event)
 
       assert_raise Ecto.NoResultsError, fn ->
         Engine.get_session_event!(scope, session_event.id)
@@ -223,13 +249,18 @@ defmodule Konew.EngineTest do
       scope = user_scope_fixture()
       other_scope = user_scope_fixture()
       session_event = session_event_fixture(scope)
-      assert_raise MatchError, fn -> Engine.delete_session_event(other_scope, session_event) end
+
+      assert_raise MatchError, fn ->
+        Engine.delete_session_event(other_scope, session_event)
+      end
     end
 
     test "change_session_event/2 returns a session_event changeset" do
       scope = user_scope_fixture()
       session_event = session_event_fixture(scope)
-      assert %Ecto.Changeset{} = Engine.change_session_event(scope, session_event)
+
+      assert %Ecto.Changeset{} =
+               Engine.change_session_event(scope, session_event)
     end
   end
 end

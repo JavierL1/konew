@@ -25,11 +25,19 @@ defmodule Konew.GroupsTest do
       room = room_fixture(scope)
       other_scope = user_scope_fixture()
       assert Groups.get_room!(scope, room.id) == room
-      assert_raise Ecto.NoResultsError, fn -> Groups.get_room!(other_scope, room.id) end
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Groups.get_room!(other_scope, room.id)
+      end
     end
 
     test "create_room/2 with valid data creates a room" do
-      valid_attrs = %{name: "some name", invite_code: "some invite_code", is_public: true}
+      valid_attrs = %{
+        name: "some name",
+        invite_code: "some invite_code",
+        is_public: true
+      }
+
       scope = user_scope_fixture()
 
       assert {:ok, %Room{} = room} = Groups.create_room(scope, valid_attrs)
@@ -41,7 +49,9 @@ defmodule Konew.GroupsTest do
 
     test "create_room/2 with invalid data returns error changeset" do
       scope = user_scope_fixture()
-      assert {:error, %Ecto.Changeset{}} = Groups.create_room(scope, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Groups.create_room(scope, @invalid_attrs)
     end
 
     test "update_room/3 with valid data updates the room" do
@@ -54,7 +64,9 @@ defmodule Konew.GroupsTest do
         is_public: false
       }
 
-      assert {:ok, %Room{} = room} = Groups.update_room(scope, room, update_attrs)
+      assert {:ok, %Room{} = room} =
+               Groups.update_room(scope, room, update_attrs)
+
       assert room.name == "some updated name"
       assert room.invite_code == "some updated invite_code"
       assert room.is_public == false
@@ -73,7 +85,10 @@ defmodule Konew.GroupsTest do
     test "update_room/3 with invalid data returns error changeset" do
       scope = user_scope_fixture()
       room = room_fixture(scope)
-      assert {:error, %Ecto.Changeset{}} = Groups.update_room(scope, room, @invalid_attrs)
+
+      assert {:error, %Ecto.Changeset{}} =
+               Groups.update_room(scope, room, @invalid_attrs)
+
       assert room == Groups.get_room!(scope, room.id)
     end
 
@@ -81,7 +96,10 @@ defmodule Konew.GroupsTest do
       scope = user_scope_fixture()
       room = room_fixture(scope)
       assert {:ok, %Room{}} = Groups.delete_room(scope, room)
-      assert_raise Ecto.NoResultsError, fn -> Groups.get_room!(scope, room.id) end
+
+      assert_raise Ecto.NoResultsError, fn ->
+        Groups.get_room!(scope, room.id)
+      end
     end
 
     test "delete_room/2 with invalid scope raises" do

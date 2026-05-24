@@ -20,28 +20,25 @@
 
   <div class="mt-12 grid grid-cols-1 md:grid-cols-4 gap-8">
     <!-- Sidebar: Members List -->
-    <div class="md:col-span-1">
-      <h3 class="text-sm font-medium text-zinc-500 dark:text-zinc-400 uppercase tracking-wider mb-4">
-        Members Online
-      </h3>
-      <ul class="space-y-3">
-        <%= for member <- @room.members do %>
-          <li class="flex items-center gap-3">
-            <div class="h-8 w-8 rounded-full bg-indigo-500 flex items-center justify-center text-white text-xs font-bold">
-              {String.at(member.email, 0) |> String.upcase()}
-            </div>
-            <span class="text-sm text-zinc-700 dark:text-zinc-300 truncate">
-              {member.email}
-            </span>
-          </li>
-        <% end %>
-      </ul>
-    </div>
+
+    <KonewWeb.SocialComponents.member_list
+      id="member-list"
+      class="md:col-span-1"
+      members={@room.members}
+    />
     
 <!-- Main Workspace Area: Takes up the remaining 3 columns -->
     <div class="md:col-span-3">
       <%= if @room.session do %>
         <!-- Active Session Template Frame -->
+        <div class="flex mb-2">
+          <.link
+            patch={~p"/rooms/#{@room.invite_code}/draw"}
+            class="bg-indigo-500 text-white px-4 py-2 rounded-lg hover:opacity-80"
+          >
+            ✏️ Draw something cool
+          </.link>
+        </div>
         <div class="p-6 bg-zinc-50 dark:bg-zinc-800/40 rounded-xl border border-zinc-200 dark:border-zinc-700">
           <div class="flex items-center gap-2 mb-4">
             <div class="h-2 w-2 rounded-full bg-emerald-500 animate-pulse" />
@@ -50,6 +47,26 @@
                 {@room.session.mechanic.name}
               </span>
             </p>
+          </div>
+
+          <div class="columns-1 gap-4 space-y-4">
+            <%= for drawing <- @drawings do %>
+              <div class="break-inside-avoid border-2 border-zinc-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+                <img
+                  src={~p"/drawings/raw/#{drawing.id}"}
+                  alt="Full Drawing"
+                  class="w-full h-auto block"
+                />
+                <div class="p-3 bg-zinc-50 flex justify-between items-center text-xs font-mono text-indigo-500">
+                  <span class="px-2 py-1 bg-zinc-200 rounded-md uppercase">
+                    {drawing.user.email}
+                  </span>
+                  <span class="px-2 py-1 bg-zinc-200 rounded-md uppercase">
+                    {drawing.human_timestamp}
+                  </span>
+                </div>
+              </div>
+            <% end %>
           </div>
           
 <!-- Future game/drawing component goes inside here -->
@@ -97,8 +114,12 @@
         class="w-full text-left p-4 rounded-xl border border-zinc-200 dark:border-zinc-700 hover:border-zinc-900 dark:hover:border-zinc-100 hover:bg-zinc-50 dark:hover:bg-zinc-800/50 transition flex justify-between items-center group cursor-pointer"
       >
         <div>
-          <h3 class="font-semibold text-zinc-900 dark:text-zinc-100">{mechanic.name}</h3>
-          <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">{mechanic.description}</p>
+          <h3 class="font-semibold text-zinc-900 dark:text-zinc-100">
+            {mechanic.name}
+          </h3>
+          <p class="text-sm text-zinc-500 dark:text-zinc-400 mt-0.5">
+            {mechanic.description}
+          </p>
         </div>
         <.icon
           name="hero-chevron-right"
@@ -106,5 +127,20 @@
         />
       </button>
     <% end %>
+  </div>
+</.modal>
+
+<.modal
+  :if={@live_action == :draw}
+  id="drawing-workspace-modal"
+  show
+  on_cancel={JS.patch(~p"/rooms/#{@room.invite_code}")}
+>
+  <div class="p-2">
+    <KonewWeb.WhiteboardComponents.whiteboard
+      id="room-canvas-hook-root"
+      hook="DrawCanvas"
+      submit_label="Submit Masterpiece"
+    />
   </div>
 </.modal>
