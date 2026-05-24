@@ -28,8 +28,11 @@ defmodule Konew.Engine.SessionEvent do
   @doc false
   def changeset(session_event, attrs, user_scope) do
     session_event
-    |> cast(attrs, [:type, :data, :sequence_number])
-    |> validate_required([:type, :sequence_number])
+    |> cast(attrs, [:type, :data, :sequence_number, :session_id])
+    |> validate_required([:type, :sequence_number, :session_id])
     |> put_change(:user_id, user_scope.user.id)
+    |> unique_constraint([:session_id, :sequence_number],
+      name: :session_events_session_id_sequence_number_index
+    )
   end
 end

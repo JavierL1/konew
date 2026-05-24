@@ -1,6 +1,8 @@
 defmodule KonewWeb.RoomLive.Show do
   use KonewWeb, :live_view
 
+  require Logger
+
   alias Konew.Groups
   alias Konew.Engine
 
@@ -81,31 +83,33 @@ defmodule KonewWeb.RoomLive.Show do
   end
 
   @impl true
-  def handle_event("submit-drawing", %{"image-data" => image_data}, socket) do
-    room = socket.assigns.room
-
-    ["data:" <> content_type_and_encoding, base64_data] = String.split(image_data, ",", parts: 2)
+  def handle_event("submit-drawing", %{"image-data" => data_uri, "strokes" => strokes}, socket) do
+    ["data:" <> content_type_and_encoding, base64_data] = String.split(data_uri, ",", parts: 2)
     [content_type, "base64"] = String.split(content_type_and_encoding, ";", parts: 2)
-    raw_image_binary = Base.decode64!(base64_data)
 
-    %{
-      image_data: raw_image_binary,
-      content_type: content_type,
-      user_id: socket.assigns.current_scope.user.id
+    event_data = %{
+      "content_type" => content_type,
+      "image_base64" => base64_data,
+      "strokes" => strokes
     }
-    |> Konew.Library.create_drawing()
+
+    insert_event_with_retry(socket, event_data, 0)
     |> case do
-      {:ok, _drawing} ->
-        drawings = fetch_room_drawings(room)
+      {:ok, saved_event} ->
+        Phoenix.PubSub.broadcast(
+          Konew.PubSub,
+          "room:#{socket.assigns.room.invite_code}",
+          {:session_event_fired, saved_event}
+        )
 
         {:noreply,
          socket
-         |> put_flash(:info, "Drawing posted successfully!")
-         |> assign(:drawings, drawings)
-         |> push_patch(to: ~p"/rooms/#{room.invite_code}")}
+         |> put_flash(:info, "Masterpiece posted!")
+         |> push_patch(to: ~p"/rooms/#{socket.assigns.room.invite_code}")}
 
-      {:error, _changeset} ->
-        {:noreply, put_flash(socket, :error, "Could not post drawing.")}
+      {:error, changeset} ->
+        Logger.error("Failed to write session drawing event: #{inspect(changeset.errors)}")
+        {:noreply, put_flash(socket, :error, "Could not save your drawing. Please try again.")}
     end
   end
 
@@ -115,5 +119,45 @@ defmodule KonewWeb.RoomLive.Show do
     |> Enum.map(fn drawing ->
       Map.put(drawing, :human_timestamp, Konew.Format.human_date(drawing.inserted_at))
     end)
+  end
+
+  defp insert_event_with_retry(socket, event_data, attempt) do
+    session_id = socket.assigns.room.session.id
+
+    IO.inspect(socket.assigns.room)
+
+    next_sequence = Engine.get_next_sequence_number(session_id)
+
+    event_params = %{
+      session_id: session_id,
+      type: "drawing_submitted",
+      sequence_number: next_sequence,
+      data: event_data
+    }
+
+    %Engine.SessionEvent{}
+    |> Engine.SessionEvent.changeset(event_params, socket.assigns.current_scope)
+    |> Konew.Repo.insert()
+    |> case do
+      {:ok, event} ->
+        {:ok, event}
+
+      {:error, %Ecto.Changeset{} = changeset} ->
+        is_unique_collision =
+          Enum.any?(changeset.errors, fn
+            {:sequence_number, {_, [constraint: :unique, constraint_name: _]}} -> true
+            _ -> false
+          end)
+
+        if is_unique_collision do
+          Logger.info(
+            "🔄 Sequence collision detected on sequence ##{next_sequence} (Attempt #{attempt}). Retrying..."
+          )
+
+          insert_event_with_retry(socket, event_data, attempt + 1)
+        else
+          {:error, changeset}
+        end
+    end
   end
 end

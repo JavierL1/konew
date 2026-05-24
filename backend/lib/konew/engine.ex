@@ -373,4 +373,20 @@ defmodule Konew.Engine do
 
     SessionEvent.changeset(session_event, attrs, scope)
   end
+
+  @doc """
+  Returns the next sequence number for a session event stream.
+  Defaults to 1 if no events exist yet.
+  """
+  def get_next_sequence_number(session_id) do
+    from(se in SessionEvent,
+      where: se.session_id == ^session_id,
+      select: max(se.sequence_number)
+    )
+    |> Repo.one()
+    |> case do
+      nil -> 1
+      max_seq -> max_seq + 1
+    end
+  end
 end
