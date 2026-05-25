@@ -1,0 +1,35 @@
+version: '3.8'
+
+services:
+  db:
+    image: postgres:16-alpine
+    container_name: konew_db
+    restart: always
+    environment:
+      POSTGRES_USER: postgres
+      #POSTGRES_PASSWORD: vtf4rvb*mjf7qfg3DGW
+      POSTGRES_DB: konew_prod
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+
+  web:
+    build:
+      context: ./backend # 👈 Tells Docker your Elixir project is in the subfolder
+      dockerfile: Dockerfile
+    container_name: konew_app
+    restart: always
+    depends_on:
+      - db
+    ports:
+      - "4000:4000"       # Main Phoenix App / LiveView
+      - "4001:4001"       # Dev Mailbox Preview
+    environment:
+      - DATABASE_URL=ecto://postgres:@db:5432/konew_prod # add password
+      - PHX_HOST=0.0.0.0
+      - PORT=4000
+      - SECRET_KEY_BASE= # add secret key
+
+volumes:
+  postgres_data:
