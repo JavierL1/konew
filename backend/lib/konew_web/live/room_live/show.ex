@@ -16,10 +16,14 @@ defmodule KonewWeb.RoomLive.Show do
          |> push_navigate(to: ~p"/rooms")}
 
       room ->
-        # Preload members along with the session and its nested mechanic blueprint
-        room = Konew.Repo.preload(room, [:members, session: :mechanic])
+        if connected?(socket) do
+          Phoenix.PubSub.subscribe(Konew.PubSub, "room:#{room.invite_code}")
+        end
 
-        drawings = fetch_room_drawings(room)
+        # Preload members along with the session and its nested mechanic blueprint
+        room = Konew.Repo.preload(room, [:members, session: [:mechanic, :events]])
+
+        drawings = fetch_drawings(room.session.events, room.members)
 
         {:ok,
          socket
@@ -60,7 +64,7 @@ defmodule KonewWeb.RoomLive.Show do
         # Reload the room aggregate from the database to reflect the new state
         updated_room =
           Groups.get_room_by_code(room.invite_code)
-          |> Konew.Repo.preload([:members, session: :mechanic])
+          |> Konew.Repo.preload([:members, session: [:mechanic, :events]])
 
         {:noreply,
          socket
@@ -84,6 +88,7 @@ defmodule KonewWeb.RoomLive.Show do
 
   @impl true
   def handle_event("submit-drawing", %{"image-data" => data_uri, "strokes" => strokes}, socket) do
+    room = socket.assigns.room
     ["data:" <> content_type_and_encoding, base64_data] = String.split(data_uri, ",", parts: 2)
     [content_type, "base64"] = String.split(content_type_and_encoding, ";", parts: 2)
 
@@ -93,7 +98,7 @@ defmodule KonewWeb.RoomLive.Show do
       "strokes" => strokes
     }
 
-    insert_event_with_retry(socket, event_data, 0)
+    insert_event_with_retry(socket, event_data)
     |> case do
       {:ok, saved_event} ->
         Phoenix.PubSub.broadcast(
@@ -102,10 +107,13 @@ defmodule KonewWeb.RoomLive.Show do
           {:session_event_fired, saved_event}
         )
 
+        drawings = fetch_drawings(room.session.events, room.members)
+
         {:noreply,
          socket
          |> put_flash(:info, "Masterpiece posted!")
-         |> push_patch(to: ~p"/rooms/#{socket.assigns.room.invite_code}")}
+         |> push_patch(to: ~p"/rooms/#{room.invite_code}")
+         |> assign(:drawings, drawings)}
 
       {:error, changeset} ->
         Logger.error("Failed to write session drawing event: #{inspect(changeset.errors)}")
@@ -113,15 +121,34 @@ defmodule KonewWeb.RoomLive.Show do
     end
   end
 
-  defp fetch_room_drawings(_room) do
-    Konew.Library.list_drawings()
-    |> Konew.Repo.preload([:user])
-    |> Enum.map(fn drawing ->
-      Map.put(drawing, :human_timestamp, Konew.Format.human_date(drawing.inserted_at))
+  @impl true
+  def handle_info({:session_event_fired, event}, socket) do
+    # Pass the single incoming event through our existing Projector clause block
+    # (Remember to ensure `apply_event/2` is defined as public `def` instead of `defp` in RoomProjector!)
+    updated_drawings =
+      Konew.Engine.SessionProjector.apply_event(event, socket.assigns.drawings)
+      |> hydrate_drawings(socket.assigns.room.members)
+
+    # LiveView automatically recalculates the DOM differentials and updates the HTML instantly!
+    {:noreply, assign(socket, :drawings, updated_drawings)}
+  end
+
+  defp fetch_drawings(events, members) do
+    Engine.SessionProjector.project_drawings(events)
+    |> hydrate_drawings(members)
+  end
+
+  defp hydrate_drawings(drawings, members) do
+    members_by_id = Map.new(members, &{&1.id, &1})
+
+    Enum.map(drawings, fn drawing ->
+      drawing
+      |> Map.put(:human_timestamp, Konew.Format.human_date(drawing.inserted_at))
+      |> Map.put(:user, Map.get(members_by_id, drawing.user_id))
     end)
   end
 
-  defp insert_event_with_retry(socket, event_data, attempt) do
+  defp insert_event_with_retry(socket, event_data, attempt \\ 0) do
     session_id = socket.assigns.room.session.id
 
     IO.inspect(socket.assigns.room)

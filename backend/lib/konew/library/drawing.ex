@@ -2,6 +2,15 @@ defmodule Konew.Library.Drawing do
   use Ecto.Schema
   import Ecto.Changeset
 
+  @type t() :: %__MODULE__{
+          image_data: binary(),
+          content_type: String.t(),
+          user_id: integer(),
+          user: Konew.Accounts.User.t() | Ecto.Association.NotLoaded.t(),
+          inserted_at: DateTime.t(),
+          updated_at: DateTime.t()
+        }
+
   schema "drawings" do
     field(:image_data, :binary)
     field(:content_type, :string)

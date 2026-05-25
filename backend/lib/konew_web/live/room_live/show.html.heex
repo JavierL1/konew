@@ -53,9 +53,9 @@
             <%= for drawing <- @drawings do %>
               <div class="break-inside-avoid border-2 border-zinc-200 rounded-xl overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
                 <img
-                  src={~p"/drawings/raw/#{drawing.id}"}
-                  alt="Full Drawing"
-                  class="w-full h-auto block"
+                  src={"data:#{drawing.content_type};base64,#{drawing.image_data}"}
+                  alt="User Snapshot Masterpiece"
+                  class="w-full h-auto block rounded-lg border border-zinc-100 dark:border-zinc-800 bg-zinc-50 "
                 />
                 <div class="p-3 bg-zinc-50 flex justify-between items-center text-xs font-mono text-indigo-500">
                   <span class="px-2 py-1 bg-zinc-200 rounded-md uppercase">
@@ -67,11 +67,6 @@
                 </div>
               </div>
             <% end %>
-          </div>
-          
-<!-- Future game/drawing component goes inside here -->
-          <div class="h-96 bg-white dark:bg-zinc-950 rounded-lg border border-zinc-100 dark:border-zinc-900 flex items-center justify-center">
-            <p class="text-zinc-400 dark:text-zinc-600 text-sm">Room ready.</p>
           </div>
         </div>
       <% else %>
