@@ -92,8 +92,9 @@ config :phoenix_live_view,
 # Disable swoosh api client as it is only required for production adapters.
 config :swoosh, :api_client, false
 
-config :swoosh,
-  mailbox_server: [
-    bind_addr: {0, 0, 0, 0},
-    port: 4001
-  ]
+config :konew, Konew.Mailer,
+  adapter: Swoosh.Adapters.SMTP,
+  relay: "mailpit",
+  port: 1025,
+  ssl: false,
+  tls: :never
