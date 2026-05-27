@@ -60,6 +60,8 @@ defmodule Konew.Accounts.UserNotifier do
         url
       end
 
+    url = String.replace(url, "https", "http")
+
     deliver(user.email, "Log in instructions", """
 
     ==============================

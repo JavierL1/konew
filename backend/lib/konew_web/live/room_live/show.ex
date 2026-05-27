@@ -23,7 +23,12 @@ defmodule KonewWeb.RoomLive.Show do
         # Preload members along with the session and its nested mechanic blueprint
         room = Konew.Repo.preload(room, [:members, session: [:mechanic, :events]])
 
-        drawings = fetch_drawings(room.session.events, room.members)
+        drawings =
+          if room.session do
+            fetch_drawings(room.session.events, room.members)
+          else
+            []
+          end
 
         {:ok,
          socket
@@ -150,8 +155,6 @@ defmodule KonewWeb.RoomLive.Show do
 
   defp insert_event_with_retry(socket, event_data, attempt \\ 0) do
     session_id = socket.assigns.room.session.id
-
-    IO.inspect(socket.assigns.room)
 
     next_sequence = Engine.get_next_sequence_number(session_id)
 

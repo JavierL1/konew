@@ -26,6 +26,9 @@ services:
     build:
       context: ./backend
       dockerfile: Dockerfile
+    stdin_open: true
+    tty: true
+    command: ["/app/bin/konew", "start_iex"]
     container_name: konew_app
     restart: always
     depends_on:
