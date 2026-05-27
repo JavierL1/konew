@@ -9,33 +9,52 @@ RUN mix local.hex --force && mix local.rebar --force
 
 ENV MIX_ENV="prod"
 
+# 1. Fetch and compile Elixir dependencies
 COPY mix.exs mix.lock ./
 RUN mix deps.get --only prod
 RUN mix deps.compile
 
-COPY assets assets
+# 2. Pull down npm dependencies
+COPY assets/package.json assets/package-lock.json ./assets/
+RUN cd assets && npm ci
+
+# 3. Copy config, migrations (priv), and source files
 COPY config config
+COPY priv priv
+COPY lib lib
+
+# 4. Compile application code FIRST for phoenix_colocated
+RUN mix compile
+
+# 5. Copy assets and deploy frontend artifacts
+COPY assets assets
 RUN mix assets.deploy
 
-COPY lib lib
-RUN mix compile
+# 6. Finalize release compilation
 RUN mix release
 
 # --- STAGE 2: Run the release ---
-FROM alpine:3.19
+FROM alpine:latest
 
+# Installs shared C-libraries needed for the runtime and the tini init system
 RUN apk add --no-cache libstdc++ openssl ncurses-libs tini
 
 WORKDIR /app
+
+# Ensure ownership permissions are set correctly for non-root execution
 RUN chown nobody /app
-USER nobody
 
 ENV MIX_ENV="prod"
 
+# Copy the compiled binaries into the execution runtime space
 COPY --from=builder --chown=nobody:root /app/_build/prod/rel/konew ./
 
-EXPOSE 4000
-EXPOSE 4001
+# Copy and grant execution rights to your migration wrapper script
+COPY entrypoint.sh /app/entrypoint.sh
+RUN chmod +x /app/entrypoint.sh
 
-ENTRYPOINT ["/sbin/tini", "--"]
+EXPOSE 4000
+
+# Execute entrypoint.sh using tini to reap zombie processes safely
+ENTRYPOINT ["/sbin/tini", "--", "/app/entrypoint.sh"]
 CMD ["/app/bin/konew", "start"]

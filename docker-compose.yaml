@@ -7,29 +7,38 @@ services:
     restart: always
     environment:
       POSTGRES_USER: postgres
-      #POSTGRES_PASSWORD: vtf4rvb*mjf7qfg3DGW
+      POSTGRES_PASSWORD: local_dev_secret_password
       POSTGRES_DB: konew_prod
     volumes:
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
 
+  mailpit:
+    image: axllent/mailpit:latest
+    container_name: konew_mailbox
+    restart: always
+    ports:
+      - "8025:8025"       # Web UI dashboard for emails
+      - "1025:1025"       # SMTP Server port
+
   web:
     build:
-      context: ./backend # 👈 Tells Docker your Elixir project is in the subfolder
+      context: ./backend
       dockerfile: Dockerfile
     container_name: konew_app
     restart: always
     depends_on:
       - db
+      - mailpit
     ports:
-      - "4000:4000"       # Main Phoenix App / LiveView
-      - "4001:4001"       # Dev Mailbox Preview
+      - "4000:4000"
     environment:
-      - DATABASE_URL=ecto://postgres:@db:5432/konew_prod # add password
-      - PHX_HOST=0.0.0.0
+      - DATABASE_URL=ecto://postgres:local_dev_secret_password@db:5432/konew_prod
+      - PHX_HOST=192.168.100.11
+      - PHX_SERVER=true
       - PORT=4000
-      - SECRET_KEY_BASE= # add secret key
+      - SECRET_KEY_BASE="please run mix phx.gen.secret"
 
 volumes:
   postgres_data:
