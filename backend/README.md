@@ -28,6 +28,9 @@ curl -X POST http://localhost:4000/api/drawings \
 
 - [x] Post drawings
 - [x] Drawing view
-- [ ] Create user rooms
-- [ ] Join user rooms
+- [x] Create user rooms
+- [x] Join user rooms
+- [ ] Add Sqlite adapter
+- [ ] Update test suite
+- [ ] React to drawings
 - [ ] Create challenges
