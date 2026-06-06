@@ -8,6 +8,7 @@ defmodule Konew.Accounts do
 
   alias Konew.Accounts.{User, UserToken, UserNotifier}
 
+  @max_users 20
   ## Database getters
 
   @doc """
@@ -75,9 +76,13 @@ defmodule Konew.Accounts do
 
   """
   def register_user(attrs) do
-    %User{}
-    |> User.email_changeset(attrs)
-    |> Repo.insert()
+    if Repo.aggregate(User, :count, :id) >= @max_users do
+      {:error, :registration_closed}
+    else
+      %User{}
+      |> User.email_changeset(attrs)
+      |> Repo.insert()
+    end
   end
 
   ## Settings

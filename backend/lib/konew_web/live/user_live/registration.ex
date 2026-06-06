@@ -86,6 +86,9 @@ defmodule KonewWeb.UserLive.Registration do
          )
          |> push_navigate(to: ~p"/users/log-in")}
 
+      {:error, :registration_closed} ->
+        {:noreply, put_flash(socket, :error, "Sorry, registration is currently full.")}
+
       {:error, %Ecto.Changeset{} = changeset} ->
         {:noreply, assign_form(socket, changeset)}
     end
