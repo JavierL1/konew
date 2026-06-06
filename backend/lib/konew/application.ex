@@ -7,6 +7,8 @@ defmodule Konew.Application do
 
   @impl true
   def start(_type, _args) do
+    Konew.Release.migrate()
+
     children = [
       KonewWeb.Telemetry,
       Konew.Repo,

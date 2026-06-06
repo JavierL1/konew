@@ -7,7 +7,7 @@ defmodule Konew.Release do
   def migrate do
     # 1. Ensure minimal storage applications are active
     Application.load(@app)
-    {:ok, _} = Application.ensure_all_started(:postgrex)
+    {:ok, _} = Application.ensure_all_started(:ecto_sqlite3)
     {:ok, _} = Application.ensure_all_started(:ecto_sql)
 
     # 2. Iterate through all configured Ecto repositories

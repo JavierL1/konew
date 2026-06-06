@@ -8,11 +8,18 @@ config :bcrypt_elixir, :log_rounds, 1
 # The MIX_TEST_PARTITION environment variable can be used
 # to provide built-in test partitioning in CI environment.
 # Run `mix help test` for more information.
+
+# config :konew, Konew.Repo,
+#   username: "postgres",
+#   password: "postgres",
+#   hostname: "db",
+#   database: "konew_test#{System.get_env("MIX_TEST_PARTITION")}",
+#   pool: Ecto.Adapters.SQL.Sandbox,
+#   pool_size: System.schedulers_online() * 2
+
 config :konew, Konew.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "db",
-  database: "konew_test#{System.get_env("MIX_TEST_PARTITION")}",
+  adapter: Ecto.Adapters.SQLite3,
+  database: "konew_test#{System.get_env("MIX_TEST_PARTITION")}.db",
   pool: Ecto.Adapters.SQL.Sandbox,
   pool_size: System.schedulers_online() * 2
 

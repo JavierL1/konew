@@ -1,26 +1,13 @@
 version: '3.8'
 
 services:
-  db:
-    image: postgres:16-alpine
-    container_name: konew_db
-    restart: always
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: local_dev_secret_password
-      POSTGRES_DB: konew_prod
-    volumes:
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-
   mailpit:
     image: axllent/mailpit:latest
     container_name: konew_mailbox
     restart: always
     ports:
-      - "8025:8025"       # Web UI dashboard for emails
-      - "1025:1025"       # SMTP Server port
+      - "8025:8025"
+      - "1025:1025"
 
   web:
     build:
@@ -32,16 +19,18 @@ services:
     container_name: konew_app
     restart: always
     depends_on:
-      - db
       - mailpit
     ports:
       - "4000:4000"
     environment:
-      - DATABASE_URL=ecto://postgres:local_dev_secret_password@db:5432/konew_prod
+      - DB_ADAPTER=sqlite3
+      - DATABASE_PATH=/app/data/konew_prod.db
       - PHX_HOST=192.168.100.11
       - PHX_SERVER=true
       - PORT=4000
       - SECRET_KEY_BASE="please run mix phx.gen.secret"
+    volumes:
+      - sqlite_data:/app/data
 
 volumes:
-  postgres_data:
+  sqlite_data:

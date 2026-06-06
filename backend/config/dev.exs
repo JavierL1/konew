@@ -2,13 +2,11 @@ import Config
 
 # Configure your database
 config :konew, Konew.Repo,
-  username: "postgres",
-  password: "postgres",
-  hostname: "db",
-  database: "konew_dev",
+  adapter: Ecto.Adapters.SQLite3,
+  database: "konew_dev.db",
+  pool_size: 5,
   stacktrace: true,
-  show_sensitive_data_on_connection_error: true,
-  pool_size: 10
+  show_sensitive_data_on_connection_error: true
 
 # For development, we disable any cache and enable
 # debugging and code reloading.

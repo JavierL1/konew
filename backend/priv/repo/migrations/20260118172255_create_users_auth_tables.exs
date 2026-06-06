@@ -2,10 +2,11 @@ defmodule Konew.Repo.Migrations.CreateUsersAuthTables do
   use Ecto.Migration
 
   def change do
-    execute "CREATE EXTENSION IF NOT EXISTS citext", ""
+    # PostgreSQL specific extension removed
 
     create table(:users) do
-      add :email, :citext, null: false
+      # Changed :citext to :text
+      add :email, :text, null: false
       add :hashed_password, :string
       add :confirmed_at, :utc_datetime
 
