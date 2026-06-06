@@ -112,4 +112,8 @@ if config_env() == :prod do
   #     config :swoosh, :api_client, Swoosh.ApiClient.Req
   #
   # See https://hexdocs.pm/swoosh/Swoosh.html#module-installation for details.
+
+  config :konew, Konew.Mailer,
+    adapter: Swoosh.Adapters.Mailtrap,
+    api_key: System.get_env("SMTP_API_KEY")
 end

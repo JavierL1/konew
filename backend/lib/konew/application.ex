@@ -14,6 +14,7 @@ defmodule Konew.Application do
       Konew.Repo,
       {DNSCluster, query: Application.get_env(:konew, :dns_cluster_query) || :ignore},
       {Phoenix.PubSub, name: Konew.PubSub},
+      {Finch, name: Swoosh.Finch},
       # Start a worker by calling: Konew.Worker.start_link(arg)
       # {Konew.Worker, arg},
       # Start to serve requests, typically the last entry

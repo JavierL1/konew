@@ -9,7 +9,7 @@ defmodule Konew.Accounts.UserNotifier do
     email =
       new()
       |> to(recipient)
-      |> from({"Konew", "contact@example.com"})
+      |> from(Mailer.default_from())
       |> subject(subject)
       |> text_body(body)
 

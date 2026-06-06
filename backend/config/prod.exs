@@ -17,15 +17,15 @@ config :konew, KonewWeb.Endpoint,
     hosts: ["localhost", "127.0.0.1"]
   ]
 
-config :konew, Konew.Mailer,
-  adapter: Swoosh.Adapters.SMTP,
-  relay: "mailpit",
-  port: 1025,
-  ssl: false,
-  tls: :never
+# config :konew, Konew.Mailer,
+#   adapter: Swoosh.Adapters.SMTP,
+#   relay: "mailpit",
+#   port: 1025,
+#   ssl: false,
+#   tls: :never
 
 # Ensure the local memory adapter API client is turned off
-config :swoosh, :api_client, false
+config :swoosh, :api_client, Swoosh.ApiClient.Finch
 
 # Disable Swoosh Local Memory Storage
 config :swoosh, local: false
