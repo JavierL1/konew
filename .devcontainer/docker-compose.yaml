@@ -8,28 +8,14 @@ services:
       - ..:/workspace:cached
       - elixir-deps:/workspace/deps
       - elixir-build:/workspace/_build
+      - sqlite_data:/app/data
     ports:
       - "0.0.0.0:4000:4000"
     command: sleep infinity
     depends_on:
-      - db
       - mailpit
     environment:
-      - DATABASE_HOST=db
-      - DATABASE_USER=postgres
-      - DATABASE_PASSWORD=postgres
-
-  db:
-    image: postgres:17-alpine
-    restart: unless-stopped
-    ports: 
-      - "5433:5432"
-    environment:
-      - POSTGRES_USER=postgres
-      - POSTGRES_PASSWORD=postgres
-      - POSTGRES_DB=my_app_dev
-    volumes:
-      - postgres-data:/var/lib/postgresql/data
+      - DATABASE_PATH=/app/data/konew_dev.db
 
   mailpit:
     image: axllent/mailpit:latest
@@ -39,6 +25,6 @@ services:
       - "127.0.0.1:1025:1025"
 
 volumes:
-  postgres-data:
   elixir-deps:
   elixir-build:
+  sqlite_data:
