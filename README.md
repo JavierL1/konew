@@ -30,7 +30,7 @@ curl -X POST http://localhost:4000/api/drawings \
 - [x] Drawing view
 - [x] Create user rooms
 - [x] Join user rooms
-- [ ] Add Sqlite adapter
-- [ ] Update test suite
+- [x] Add Sqlite adapter
+- [x] Update test suite
 - [ ] React to drawings
 - [ ] Create challenges
