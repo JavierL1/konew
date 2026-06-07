@@ -30,6 +30,6 @@ defmodule Konew.Engine.Session do
   def changeset(session, attrs) do
     session
     |> cast(attrs, [:room_id, :mechanic_id, :config, :state])
-    |> validate_required([])
+    |> validate_required([:config, :state])
   end
 end

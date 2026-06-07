@@ -106,10 +106,7 @@ defmodule Konew.Groups do
   def create_room(%Scope{} = scope, attrs) do
     invite_code = generate_6_char_code()
 
-    attrs_with_defaults =
-      attrs
-      |> Map.put("owner_id", scope.user.id)
-      |> Map.put("invite_code", invite_code)
+    attrs_with_defaults = Enum.into(attrs, %{owner_id: scope.user.id, invite_code: invite_code})
 
     Multi.new()
     |> Multi.insert(:room, Room.changeset(%Room{}, attrs_with_defaults))
@@ -120,6 +117,16 @@ defmodule Konew.Groups do
       })
     end)
     |> Repo.transaction()
+    |> case do
+      {:ok, %{room: room}} ->
+        {:ok, room}
+
+      {:error, :room, changeset, _context} ->
+        {:error, changeset}
+
+      error ->
+        error
+    end
   end
 
   @doc """
@@ -136,7 +143,7 @@ defmodule Konew.Groups do
   """
   def update_room(%Scope{} = scope, %Room{} = room, attrs) do
     true = room.owner_id == scope.user.id
-    attrs_with_owner = Map.put(attrs, "owner_id", scope.user.id)
+    attrs_with_owner = Map.put(attrs, :owner_id, scope.user.id)
 
     with {:ok, room = %Room{}} <-
            room

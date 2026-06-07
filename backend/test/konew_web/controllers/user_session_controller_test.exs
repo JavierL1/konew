@@ -1,5 +1,5 @@
 defmodule KonewWeb.UserSessionControllerTest do
-  use KonewWeb.ConnCase, async: true
+  use KonewWeb.ConnCase, async: false
 
   import Konew.AccountsFixtures
   alias Konew.Accounts

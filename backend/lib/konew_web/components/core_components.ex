@@ -564,7 +564,7 @@ defmodule KonewWeb.CoreComponents do
     >
       <div
         id={"#{@id}-bg"}
-        class="bg-zinc-50/90 dark:bg-zinc-900/90 fixed inset-0 transition-opacity"
+        class="bg-zinc-100/20 dark:bg-zinc-900/90 fixed inset-0 transition-opacity"
         aria-hidden="true"
       />
       <div
@@ -582,7 +582,7 @@ defmodule KonewWeb.CoreComponents do
               phx-window-keydown={hide_modal(@on_cancel, @id)}
               phx-key="escape"
               phx-click-away={hide_modal(@on_cancel, @id)}
-              class="shadow-zinc-700/10 ring-zinc-700/10 dark:ring-zinc-800 relative hidden rounded-2xl bg-white dark:bg-zinc-900 p-14 shadow-lg ring-1 transition"
+              class=" ring-zinc-700/10 dark:ring-zinc-800 relative hidden rounded-2xl bg-zinc-800 dark:bg-zinc-900 p-14 shadow-lg ring-1 transition"
             >
               <div class="absolute top-6 right-5">
                 <button
@@ -633,7 +633,7 @@ defmodule KonewWeb.CoreComponents do
   def simple_form(assigns) do
     ~H"""
     <.form :let={f} for={@for} as={@as} {@rest}>
-      <div class="mt-10 space-y-8 bg-white dark:bg-zinc-900">
+      <div class="mt-10 space-y-8 bg-zinc-800 dark:bg-zinc-900">
         {render_slot(@inner_block, f)}
         <div
           :for={action <- @actions}

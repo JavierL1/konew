@@ -7,6 +7,7 @@ defmodule Konew.Library do
   alias Konew.Repo
 
   alias Konew.Library.Drawing
+  alias Konew.Accounts.Scope
 
   @doc """
   Returns the list of drawings.
@@ -42,16 +43,16 @@ defmodule Konew.Library do
 
   ## Examples
 
-      iex> create_drawing(%{field: value})
+      iex> create_drawing(scope, %{field: value})
       {:ok, %Drawing{}}
 
-      iex> create_drawing(%{field: bad_value})
+      iex> create_drawing(scope, %{field: bad_value})
       {:error, %Ecto.Changeset{}}
 
   """
-  def create_drawing(attrs) do
+  def create_drawing(%Scope{} = scope, attrs) do
     %Drawing{}
-    |> Drawing.changeset(attrs)
+    |> Drawing.changeset(attrs, scope)
     |> Repo.insert()
   end
 
@@ -67,9 +68,9 @@ defmodule Konew.Library do
       {:error, %Ecto.Changeset{}}
 
   """
-  def update_drawing(%Drawing{} = drawing, attrs) do
+  def update_drawing(%Scope{} = scope, %Drawing{} = drawing, attrs) do
     drawing
-    |> Drawing.changeset(attrs)
+    |> Drawing.changeset(attrs, scope)
     |> Repo.update()
   end
 
@@ -98,7 +99,7 @@ defmodule Konew.Library do
       %Ecto.Changeset{data: %Drawing{}}
 
   """
-  def change_drawing(%Drawing{} = drawing, attrs \\ %{}) do
-    Drawing.changeset(drawing, attrs)
+  def change_drawing(%Scope{} = scope, %Drawing{} = drawing, attrs \\ %{}) do
+    Drawing.changeset(drawing, attrs, scope)
   end
 end

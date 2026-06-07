@@ -1,5 +1,5 @@
 defmodule KonewWeb.ErrorJSONTest do
-  use KonewWeb.ConnCase, async: true
+  use KonewWeb.ConnCase, async: false
 
   test "renders 404" do
     assert KonewWeb.ErrorJSON.render("404.json", %{}) == %{

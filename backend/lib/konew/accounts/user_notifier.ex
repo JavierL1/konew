@@ -49,19 +49,6 @@ defmodule Konew.Accounts.UserNotifier do
   end
 
   defp deliver_magic_link_instructions(user, url) do
-    host = System.get_env("PHX_HOST") || "localhost"
-    port = System.get_env("PORT") || "4000"
-
-    url =
-      if not String.contains?(url, port) do
-        [scheme, path] = String.split(url, host)
-        scheme <> host <> ":" <> port <> path
-      else
-        url
-      end
-
-    url = String.replace(url, "https", "http")
-
     deliver(user.email, "Log in instructions", """
 
     ==============================

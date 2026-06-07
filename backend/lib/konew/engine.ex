@@ -211,14 +211,12 @@ defmodule Konew.Engine do
         nil ->
           mechanic = Repo.get!(Mechanic, mechanic_id)
 
-          %Session{}
-          |> Session.changeset(%{
+          create_session(%{
             room_id: room_id,
             mechanic_id: mechanic_id,
             config: mechanic.config,
             state: %{}
           })
-          |> Repo.insert!()
       end
     end)
   end

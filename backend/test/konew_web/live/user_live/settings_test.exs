@@ -1,5 +1,5 @@
 defmodule KonewWeb.UserLive.SettingsTest do
-  use KonewWeb.ConnCase, async: true
+  use KonewWeb.ConnCase, async: false
 
   alias Konew.Accounts
   import Phoenix.LiveViewTest

@@ -1,5 +1,5 @@
 defmodule KonewWeb.UserAuthTest do
-  use KonewWeb.ConnCase, async: true
+  use KonewWeb.ConnCase, async: false
 
   alias Phoenix.LiveView
   alias Konew.Accounts

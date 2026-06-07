@@ -21,9 +21,10 @@ defmodule Konew.Library.Drawing do
   end
 
   @doc false
-  def changeset(drawing, attrs) do
+  def changeset(drawing, attrs, user_scope) do
     drawing
-    |> cast(attrs, [:image_data, :content_type, :user_id])
+    |> cast(attrs, [:image_data, :content_type])
+    |> put_change(:user_id, user_scope.user.id)
     |> validate_required([:image_data, :content_type, :user_id])
   end
 end

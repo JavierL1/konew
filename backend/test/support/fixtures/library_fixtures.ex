@@ -7,14 +7,15 @@ defmodule Konew.LibraryFixtures do
   @doc """
   Generate a drawing.
   """
-  def drawing_fixture(attrs \\ %{}) do
-    {:ok, drawing} =
+  def drawing_fixture(scope, attrs \\ %{}) do
+    attrs =
       attrs
       |> Enum.into(%{
         content_type: "some content_type",
         image_data: "some image_data"
       })
-      |> Konew.Library.create_drawing()
+
+    {:ok, drawing} = Konew.Library.create_drawing(scope, attrs)
 
     drawing
   end

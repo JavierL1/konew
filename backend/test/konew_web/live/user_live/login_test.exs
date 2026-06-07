@@ -1,5 +1,5 @@
 defmodule KonewWeb.UserLive.LoginTest do
-  use KonewWeb.ConnCase, async: true
+  use KonewWeb.ConnCase, async: false
 
   import Phoenix.LiveViewTest
   import Konew.AccountsFixtures

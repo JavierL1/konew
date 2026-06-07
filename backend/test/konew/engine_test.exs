@@ -158,15 +158,17 @@ defmodule Konew.EngineTest do
     test "list_session_events/1 returns all scoped session_events" do
       scope = user_scope_fixture()
       other_scope = user_scope_fixture()
-      session_event = session_event_fixture(scope)
-      other_session_event = session_event_fixture(other_scope)
+      session = session_fixture()
+      session_event = session_event_fixture(scope, session)
+      other_session_event = session_event_fixture(other_scope, session, sequence_number: 44)
       assert Engine.list_session_events(scope) == [session_event]
       assert Engine.list_session_events(other_scope) == [other_session_event]
     end
 
     test "get_session_event!/2 returns the session_event with given id" do
       scope = user_scope_fixture()
-      session_event = session_event_fixture(scope)
+      session = session_fixture()
+      session_event = session_event_fixture(scope, session)
       other_scope = user_scope_fixture()
       assert Engine.get_session_event!(scope, session_event.id) == session_event
 
@@ -176,7 +178,8 @@ defmodule Konew.EngineTest do
     end
 
     test "create_session_event/2 with valid data creates a session_event" do
-      valid_attrs = %{data: %{}, type: "some type", sequence_number: 42}
+      session = session_fixture()
+      valid_attrs = %{data: %{}, type: "some type", sequence_number: 42, session_id: session.id}
       scope = user_scope_fixture()
 
       assert {:ok, %SessionEvent{} = session_event} =
@@ -197,7 +200,8 @@ defmodule Konew.EngineTest do
 
     test "update_session_event/3 with valid data updates the session_event" do
       scope = user_scope_fixture()
-      session_event = session_event_fixture(scope)
+      session = session_fixture()
+      session_event = session_event_fixture(scope, session)
 
       update_attrs = %{
         data: %{},
@@ -216,7 +220,8 @@ defmodule Konew.EngineTest do
     test "update_session_event/3 with invalid scope raises" do
       scope = user_scope_fixture()
       other_scope = user_scope_fixture()
-      session_event = session_event_fixture(scope)
+      session = session_fixture()
+      session_event = session_event_fixture(scope, session)
 
       assert_raise MatchError, fn ->
         Engine.update_session_event(other_scope, session_event, %{})
@@ -225,7 +230,8 @@ defmodule Konew.EngineTest do
 
     test "update_session_event/3 with invalid data returns error changeset" do
       scope = user_scope_fixture()
-      session_event = session_event_fixture(scope)
+      session = session_fixture()
+      session_event = session_event_fixture(scope, session)
 
       assert {:error, %Ecto.Changeset{}} =
                Engine.update_session_event(scope, session_event, @invalid_attrs)
@@ -235,7 +241,8 @@ defmodule Konew.EngineTest do
 
     test "delete_session_event/2 deletes the session_event" do
       scope = user_scope_fixture()
-      session_event = session_event_fixture(scope)
+      session = session_fixture()
+      session_event = session_event_fixture(scope, session)
 
       assert {:ok, %SessionEvent{}} =
                Engine.delete_session_event(scope, session_event)
@@ -248,7 +255,8 @@ defmodule Konew.EngineTest do
     test "delete_session_event/2 with invalid scope raises" do
       scope = user_scope_fixture()
       other_scope = user_scope_fixture()
-      session_event = session_event_fixture(scope)
+      session = session_fixture()
+      session_event = session_event_fixture(scope, session)
 
       assert_raise MatchError, fn ->
         Engine.delete_session_event(other_scope, session_event)
@@ -257,7 +265,8 @@ defmodule Konew.EngineTest do
 
     test "change_session_event/2 returns a session_event changeset" do
       scope = user_scope_fixture()
-      session_event = session_event_fixture(scope)
+      session = session_fixture()
+      session_event = session_event_fixture(scope, session)
 
       assert %Ecto.Changeset{} =
                Engine.change_session_event(scope, session_event)

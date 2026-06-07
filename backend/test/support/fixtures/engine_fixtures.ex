@@ -39,12 +39,13 @@ defmodule Konew.EngineFixtures do
   @doc """
   Generate a session_event.
   """
-  def session_event_fixture(scope, attrs \\ %{}) do
+  def session_event_fixture(scope, session, attrs \\ %{}) do
     attrs =
       Enum.into(attrs, %{
         data: %{},
         sequence_number: 42,
-        type: "some type"
+        type: "some type",
+        session_id: session.id
       })
 
     {:ok, session_event} = Konew.Engine.create_session_event(scope, attrs)

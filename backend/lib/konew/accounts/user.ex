@@ -36,10 +36,19 @@ defmodule Konew.Accounts.User do
       Defaults to `true`.
   """
   def email_changeset(user, attrs, opts \\ []) do
+    attrs = downcase_email(attrs)
+
     user
     |> cast(attrs, [:email])
     |> validate_email(opts)
   end
+
+  defp downcase_email(%{email: email} = attrs), do: Map.put(attrs, :email, String.downcase(email))
+
+  defp downcase_email(%{"email" => email} = attrs),
+    do: Map.put(attrs, "email", String.downcase(email))
+
+  defp downcase_email(attrs), do: attrs
 
   defp validate_email(changeset, opts) do
     changeset =
