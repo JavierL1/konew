@@ -106,7 +106,8 @@ defmodule Konew.Groups do
   def create_room(%Scope{} = scope, attrs) do
     invite_code = generate_6_char_code()
 
-    attrs_with_defaults = Enum.into(attrs, %{owner_id: scope.user.id, invite_code: invite_code})
+    attrs_with_defaults =
+      Enum.into(attrs, %{"owner_id" => scope.user.id, "invite_code" => invite_code})
 
     Multi.new()
     |> Multi.insert(:room, Room.changeset(%Room{}, attrs_with_defaults))

@@ -55,7 +55,7 @@ defmodule KonewWeb.RoomLive.Index do
   @impl true
   def handle_event("save", %{"room" => room_params}, socket) do
     case Groups.create_room(socket.assigns.current_scope, room_params) do
-      {:ok, %{room: room}} ->
+      {:ok, room} ->
         {:noreply,
          socket
          |> put_flash(:info, "Room created successfully!")
