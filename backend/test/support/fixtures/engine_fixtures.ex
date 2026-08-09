@@ -51,4 +51,16 @@ defmodule Konew.EngineFixtures do
     {:ok, session_event} = Konew.Engine.create_session_event(scope, attrs)
     session_event
   end
+
+  def drawing_submitted_fixture(scope, session, attrs \\ %{}) do
+    {:ok, data} = get_json("test/support/sample_drawing.json")
+
+    attrs = Enum.into(attrs, %{data: data, type: "drawing_submitted"})
+
+    session_event_fixture(scope, session, attrs)
+  end
+
+  def get_json(filename) do
+    with {:ok, body} <- File.read(filename), {:ok, json} <- Jason.decode(body), do: {:ok, json}
+  end
 end
