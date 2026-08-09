@@ -25,5 +25,24 @@ defmodule Konew.Engine.SessionProjectorTest do
       assert drawing.inserted_at == drawing_submitted_event.inserted_at
       assert drawing.updated_at == drawing_submitted_event.inserted_at
     end
+
+    test "returns an empty list when a drawing_submitted and corresponding drawing_cleared events are present" do
+      scope = user_scope_fixture()
+      session = session_fixture()
+      drawing_submitted_event = drawing_submitted_fixture(scope, session)
+
+      drawing_cleared_event =
+        session_event_fixture(scope, session, %{
+          type: "drawing_cleared",
+          data: %{"drawing_id" => drawing_submitted_event.sequence_number},
+          sequence_number: drawing_submitted_event.sequence_number + 1
+        })
+
+      assert [] =
+               Konew.Engine.SessionProjector.project_drawings([
+                 drawing_submitted_event,
+                 drawing_cleared_event
+               ])
+    end
   end
 end
