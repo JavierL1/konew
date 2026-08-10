@@ -97,13 +97,16 @@ defmodule KonewWeb.RoomLive.Show do
     ["data:" <> content_type_and_encoding, base64_data] = String.split(data_uri, ",", parts: 2)
     [content_type, "base64"] = String.split(content_type_and_encoding, ";", parts: 2)
 
-    event_data = %{
-      "content_type" => content_type,
-      "image_base64" => base64_data,
-      "strokes" => strokes
+    event_params = %{
+      type: "drawing_submitted",
+      data: %{
+        "content_type" => content_type,
+        "image_base64" => base64_data,
+        "strokes" => strokes
+      }
     }
 
-    insert_event_with_retry(socket, event_data)
+    insert_event_with_retry(socket, event_params)
     |> case do
       {:ok, saved_event} ->
         Phoenix.PubSub.broadcast(
@@ -121,8 +124,48 @@ defmodule KonewWeb.RoomLive.Show do
          |> assign(:drawings, drawings)}
 
       {:error, changeset} ->
-        Logger.error("Failed to write session drawing event: #{inspect(changeset.errors)}")
+        Logger.error(
+          "Failed to write session drawing_submitted event: #{inspect(changeset.errors)}"
+        )
+
         {:noreply, put_flash(socket, :error, "Could not save your drawing. Please try again.")}
+    end
+  end
+
+  @impl true
+  def handle_event("delete-drawing", %{"id" => id}, socket) do
+    room = socket.assigns.room
+
+    event_params = %{
+      type: "drawing_cleared",
+      data: %{
+        "drawing_id" => id
+      }
+    }
+
+    insert_event_with_retry(socket, event_params)
+    |> case do
+      {:ok, saved_event} ->
+        Phoenix.PubSub.broadcast(
+          Konew.PubSub,
+          "room:#{socket.assigns.room.invite_code}",
+          {:session_event_fired, saved_event}
+        )
+
+        drawings = fetch_drawings(room.session.events, room.members)
+
+        {:noreply,
+         socket
+         |> put_flash(:info, "Drawing deleted")
+         |> push_patch(to: ~p"/rooms/#{room.invite_code}")
+         |> assign(:drawings, drawings)}
+
+      {:error, changeset} ->
+        Logger.error(
+          "Failed to write session drawing_cleared event: #{inspect(changeset.errors)}"
+        )
+
+        {:noreply, put_flash(socket, :error, "Could not delete your drawing. Please try again.")}
     end
   end
 
@@ -153,17 +196,15 @@ defmodule KonewWeb.RoomLive.Show do
     end)
   end
 
-  defp insert_event_with_retry(socket, event_data, attempt \\ 0) do
+  defp insert_event_with_retry(socket, event_params, attempt \\ 0) do
     session_id = socket.assigns.room.session.id
-
     next_sequence = Engine.get_next_sequence_number(session_id)
 
-    event_params = %{
-      session_id: session_id,
-      type: "drawing_submitted",
-      sequence_number: next_sequence,
-      data: event_data
-    }
+    event_params =
+      Enum.into(event_params, %{
+        session_id: session_id,
+        sequence_number: next_sequence
+      })
 
     %Engine.SessionEvent{}
     |> Engine.SessionEvent.changeset(event_params, socket.assigns.current_scope)
@@ -184,7 +225,7 @@ defmodule KonewWeb.RoomLive.Show do
             "🔄 Sequence collision detected on sequence ##{next_sequence} (Attempt #{attempt}). Retrying..."
           )
 
-          insert_event_with_retry(socket, event_data, attempt + 1)
+          insert_event_with_retry(socket, event_params, attempt + 1)
         else
           {:error, changeset}
         end

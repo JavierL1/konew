@@ -28,7 +28,7 @@ defmodule Konew.Engine.SessionProjector do
   def apply_event(%SessionEvent{type: "drawing_cleared"} = event, acc) do
     cleared_drawing_id = Utils.Integer.parse(event.data["drawing_id"])
 
-    Enum.reject(acc, &(&1.id == cleared_drawing_id))
+    Enum.reject(acc, &(&1.id == cleared_drawing_id and &1.user_id == event.user_id))
   end
 
   def apply_event(_other_event, acc), do: acc
