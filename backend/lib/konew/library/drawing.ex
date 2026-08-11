@@ -5,6 +5,7 @@ defmodule Konew.Library.Drawing do
   @type t() :: %__MODULE__{
           image_data: binary(),
           content_type: String.t(),
+          reactions: list(Konew.Interactions.Reaction.t()),
           user_id: integer(),
           user: Konew.Accounts.User.t() | Ecto.Association.NotLoaded.t(),
           inserted_at: DateTime.t(),
@@ -14,6 +15,7 @@ defmodule Konew.Library.Drawing do
   schema "drawings" do
     field(:image_data, :binary)
     field(:content_type, :string)
+    embeds_many(:reactions, Konew.Interactions.Reaction)
 
     belongs_to(:user, Konew.Accounts.User)
 

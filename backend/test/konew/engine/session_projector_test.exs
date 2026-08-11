@@ -65,6 +65,41 @@ defmodule Konew.Engine.SessionProjectorTest do
     end
   end
 
+  describe "project_drawings/1 when receiving a drawing_reacted event" do
+    test "returns a drawing with reactions array when it matches a drawing_submitted event" do
+      scope = user_scope_fixture()
+      session = session_fixture()
+      drawing_submitted_event = drawing_submitted_fixture(scope, session)
+
+      other_scope = user_scope_fixture()
+      reaction_emoji = "😳"
+
+      drawing_reacted_event =
+        session_event_fixture(other_scope, session, %{
+          type: "drawing_reacted",
+          data: %{
+            "drawing_id" => drawing_submitted_event.sequence_number,
+            "emoji" => reaction_emoji
+          },
+          sequence_number: drawing_submitted_event.sequence_number + 1
+        })
+
+      assert [drawing | []] =
+               Konew.Engine.SessionProjector.project_drawings([
+                 drawing_submitted_event,
+                 drawing_reacted_event
+               ])
+
+      check_drawing_and_drawing_submitted_event(drawing, drawing_submitted_event)
+      assert [reaction | []] = drawing.reactions
+      assert %Konew.Interactions.Reaction{} = reaction
+      assert reaction.id == drawing_reacted_event.sequence_number
+      assert reaction.user_id == drawing_reacted_event.user_id
+      assert reaction.drawing_id == drawing.id
+      assert reaction.emoji == reaction_emoji
+    end
+  end
+
   defp check_drawing_and_drawing_submitted_event(drawing, drawing_submitted_event) do
     assert %Konew.Library.Drawing{} = drawing
     assert drawing.id == drawing_submitted_event.sequence_number
